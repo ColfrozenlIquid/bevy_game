@@ -1,14 +1,10 @@
+use std::{net::UdpSocket, time::SystemTime};
+
 use bevy::prelude::*;
+use bevy_renet::{renet::{transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig}, ConnectionConfig, DefaultChannel, RenetServer, ServerEvent}, transport::NetcodeServerPlugin, RenetServerPlugin};
 
 const SPRITE_PATH: &str = ".\\sprites\\vampire_v1_1_animated.png";
 
-fn main() {
-    App::new().add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
-    .add_systems(Startup, setup)
-    .add_systems(Update, animate_sprite)
-    .add_systems(Update, keyboard_input_system)
-    .run();
-}
 
 struct Character {
     x_pos: f32,
@@ -23,6 +19,38 @@ struct AnimationIndices {
 
 #[derive(Component, Deref, DerefMut)]
 struct AnimationTimer(Timer);
+
+fn main() {
+    let mut app = App::new();
+    initialise_renet_server(&mut app);
+    app.add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        //.add_systems(Startup, setup)
+        //.add_systems(Update, animate_sprite)
+        .add_systems(Update, keyboard_input_system)
+        .add_systems(Startup, send_message_system)
+        .add_systems(Startup, receive_message_system)
+        .add_systems(Startup, handle_events_system)
+        .run();
+}
+
+fn initialise_renet_server(app: &mut App) {
+    let server = RenetServer::new(ConnectionConfig::default());
+    let server_address = "127.0.0.1:5000".parse().unwrap();
+    let socket = UdpSocket::bind(server_address).unwrap();
+    let server_config = ServerConfig {
+        current_time: SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap(),
+        max_clients: 64,
+        protocol_id: 0,
+        public_addresses: vec![server_address],
+        authentication: ServerAuthentication::Unsecure
+    };
+    let transport = NetcodeServerTransport::new(server_config, socket).unwrap();
+    app.add_plugins(RenetServerPlugin)
+        .insert_resource(server)
+        .add_plugins(NetcodeServerPlugin)
+        .insert_resource(transport);
+    println!("Successfully initialised Renet Server.");
+}
 
 fn animate_sprite(
     time: Res<Time>,
@@ -82,5 +110,31 @@ fn keyboard_input_system(keyboard_input: Res<Input<KeyCode>>) {
     }
     if keyboard_input.pressed(KeyCode::S) {
         println!("Pressed S key");
+    }
+}
+
+fn send_message_system(mut server: ResMut<RenetServer>) {
+    let channel_id = 0;
+    server.broadcast_message(DefaultChannel::ReliableOrdered, "server message");
+}
+
+fn receive_message_system(mut server: ResMut<RenetServer>) {
+    for client_id in server.clients_id() {
+        while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered) {
+            println!("{:?}", message);
+        }
+    }
+}
+
+fn handle_events_system(mut server_events: EventReader<ServerEvent>) {
+    for event in server_events.read() {
+        match event {
+            ServerEvent::ClientConnected { client_id } => {
+                println!("Client {} connected.", client_id);
+            }
+            ServerEvent::ClientDisconnected { client_id, reason } => {
+                println!("Client {} disconnected. Reason: {}.", client_id, reason);
+            }
+        }
     }
 }
