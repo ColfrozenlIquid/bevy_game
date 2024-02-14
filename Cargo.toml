@@ -1,10 +1,19 @@
 [package]
-name = "bevy_game"
+name = "bevy_game_client"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bin]]
+name = "client"
+path = "src/bin/client.rs"
+
 [dependencies]
 bevy = "0.12.1"
-bevy_renet = "0.0.10"
+bevy_egui = "0.24.0"
+bevy_renet = {version = "0.0.10", features = ["serde"]}
+bincode = "1.3.3"
+fastrand = "2.0.1"
+renet_visualizer = {version = "0.0.7", features = ["bevy"]}
+serde = "1.0.196"
