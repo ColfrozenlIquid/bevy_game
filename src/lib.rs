@@ -1,3 +1,6 @@
+pub mod debug;
+pub mod tilemap;
+
 use std::time::Duration;
 
 use bevy::{ecs::{component::Component, entity::Entity, event::Event, system::Resource}, math::Vec3};

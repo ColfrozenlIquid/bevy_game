@@ -1,11 +1,29 @@
 use std::{net::UdpSocket, time::{SystemTime, UNIX_EPOCH}};
 use bevy::{prelude::*, utils::HashMap};
-use bevy_game_client::{connection_config, ClientChannel, NetworkedEntities, PlayerInput, ServerChannel, ServerMessages, PROTOCOL_ID};
+use bevy_game_client::{connection_config, debug, tilemap, ClientChannel, NetworkedEntities, PlayerInput, ServerChannel, ServerMessages, PROTOCOL_ID};
 use bevy_renet::{client_connected, renet::{transport::{ClientAuthentication, NetcodeClientTransport, NetcodeTransportError}, ClientId, RenetClient}, transport::NetcodeClientPlugin, RenetClientPlugin};
 
+use debug::DebugPlugin;
+use tilemap::TileMapPlugin;
+
 const SPRITE_PATH: &str = ".\\sprites\\vampire_v1_1_animated.png";
-// const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
+const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
 const PLAYER_SPEED: f32 = 500.0;
+const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
+
+#[derive(Component, Default)]
+struct PlayerCamera;
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+enum GameState {
+    #[default]
+    Splash,
+    Menu,
+    Game,
+}
+
+#[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
+struct Volume(u32);
 
 #[derive(Component)]
 struct ControllablePlayer;
@@ -50,12 +68,13 @@ struct AnimationIndices {
 #[derive(Component, Deref, DerefMut)]
 struct AnimationTimer(Timer);
 
-
 fn main() {
     let mut app = App::new();
 
     app.add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
-        .add_plugins(RenetClientPlugin);
+        .add_plugins(RenetClientPlugin)
+        .add_plugins(TileMapPlugin)
+        .add_plugins(DebugPlugin);
 
     initialise_renet_transport_client(&mut app);
 
@@ -65,10 +84,51 @@ fn main() {
     app.insert_resource(PlayerSpriteAtlas::default());
 
     app.add_systems(Startup, setup);
-    app.add_systems(Update, (keyboard_input_system, animate_sprite, label_movement));
-    app.add_systems(Update, (client_send_input, client_sync_players).in_set(Connected));
+    app.add_systems(Update, (
+        keyboard_input_system, 
+        (client_send_input, client_sync_players).in_set(Connected),
+        animate_sprite, 
+        label_movement,
+        camera_follow_player
+    ).chain());
 
     app.run();
+}
+
+fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
+    for entity in &to_despawn {
+        commands.entity(entity).despawn_recursive();
+    }
+}
+
+mod splash {
+    use bevy::prelude::*;
+    use super::{despawn_screen, GameState};
+
+    pub struct SplashPlugin;
+
+    impl Plugin for SplashPlugin {
+        fn build(&self, app: &mut App) {
+            app
+                //.add_systems(OnEnter(GameState::Splash), splash_setup)
+                .add_systems(Update, countdown.run_if(in_state(GameState::Splash)))
+                .add_systems(OnExit(GameState::Splash), despawn_screen::<OnSplashScreen>);
+        }
+    }
+
+    #[derive(Component)]
+    struct OnSplashScreen;
+
+    #[derive(Resource, Deref, DerefMut)]
+    struct SplashTimer(Timer);
+
+    // fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    //     // let icon = asset_server.load(path)
+    // }
+
+    fn countdown() {
+
+    }
 }
 
 fn initialise_renet_transport_client(app: &mut App) {
@@ -108,9 +168,8 @@ fn initialise_renet_transport_client(app: &mut App) {
 
 fn keyboard_input_system(
     keyboard_input: Res<Input<KeyCode>>, 
-    mut player_query: Query<&mut Transform, &ControllablePlayer>,
     mut player_input: ResMut<PlayerInput>,
-    time: Res<Time>
+    mut sprite_query: Query<&mut TextureAtlasSprite>
 ) {
 
     player_input.left = keyboard_input.pressed(KeyCode::A) || keyboard_input.pressed(KeyCode::Left);
@@ -118,35 +177,12 @@ fn keyboard_input_system(
     player_input.up = keyboard_input.pressed(KeyCode::W) || keyboard_input.pressed(KeyCode::Up);
     player_input.down = keyboard_input.pressed(KeyCode::S) || keyboard_input.pressed(KeyCode::Down);
 
-    if let Ok(mut transform) = player_query.get_single_mut() {
-        let mut direction = Vec3::ZERO;
-        
-
-        if keyboard_input.pressed(KeyCode::D) {
-            direction += Vec3::new(1.0, 0.0, 0.0);
-            player_input.right = true;
-            if transform.scale.x < 0.0 {
-                transform.scale.x *= -1.0;
-            }
+    for mut sprite in &mut sprite_query {
+        if player_input.left {
+            sprite.flip_x = true;
+        } else if player_input.right {
+            sprite.flip_x = false;
         }
-        if keyboard_input.pressed(KeyCode::A) {
-            direction += Vec3::new(-1.0, 0.0, 0.0);
-            player_input.left = true;
-            if transform.scale.x < 0.0 {
-                transform.scale.x *= -1.0;
-            }
-            transform.scale.x *= -1.0;
-        }
-        if keyboard_input.pressed(KeyCode::W) {
-            direction += Vec3::new(0.0, 1.0, 0.0);
-            player_input.up = true;
-        }
-        if keyboard_input.pressed(KeyCode::S) {
-            player_input.down = true;
-            direction += Vec3::new(0.0, -1.0, 0.0);
-        }
-
-        transform.translation += direction * PLAYER_SPEED * time.delta_seconds();
     }
 }
 
@@ -154,7 +190,7 @@ fn label_movement(
     mut set: ParamSet<(
         Query<(&Transform, &ControllablePlayer), Without<PlayerLabel>>,
         Query<&mut Transform, With<PlayerLabel>>
-    )>
+    )>,
 ) {
     let mut transform = Vec3::default();
     for player_transform in set.p0().iter() {
@@ -176,10 +212,9 @@ fn client_sync_players(
     client_id : ResMut<CurrentClientId>,
     mut lobby: ResMut<ClientLobby>,
     mut network_mapping: ResMut<NetworkMapping>,
-    player_sprite: ResMut<PlayerSpriteAtlas>,
+    player_sprite: ResMut<PlayerSpriteAtlas>
 ) {
     let animation_indices = AnimationIndices {first: 0, last: 3};
-
     let client_id = client_id.0;
     while let Some(message) = client.receive_message(ServerChannel::ServerMessages) {
         let server_message = bincode::deserialize(&message).unwrap();
@@ -193,10 +228,11 @@ fn client_sync_players(
                         transform: Transform {
                             translation: Vec3 { x: translation[0], y: translation[1], z: translation[2] },
                             rotation: Quat::default(),
-                            scale: Vec3 { x: 6.0, y: 6.0, z: 6.0 }
+                            scale: Vec3 { x: 3.0, y: 3.0, z: 3.0 }
                         },
                         ..Default::default()
                     },
+                    // PlayerLabel,
                     animation_indices.clone(),
                     AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
                 ));
@@ -225,7 +261,6 @@ fn client_sync_players(
         }
     }
 
-
     while let Some(message) = client.receive_message(ServerChannel::NetworkedEntities) {
         let networked_entities: NetworkedEntities = bincode::deserialize(&message).unwrap();
         for i in 0..networked_entities.entities.len() {
@@ -246,45 +281,33 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    mut player_sprite: ResMut<PlayerSpriteAtlas>
+    mut player_sprite: ResMut<PlayerSpriteAtlas>, 
+    client_id : ResMut<CurrentClientId>,
 ) {
     let texture_handle = asset_server.load(SPRITE_PATH);
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(16.0, 16.0), 4, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    //let animation_indices = AnimationIndices {first: 0, last: 3};
-
+    
     player_sprite.handle = texture_atlas_handle.clone();
     
-    commands.spawn(Camera2dBundle::default());
-    // commands.spawn((
-    //     SpriteSheetBundle {
-    //         texture_atlas: texture_atlas_handle,
-    //         sprite: TextureAtlasSprite::new(animation_indices.first),
-    //         transform: Transform {
-    //             translation: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-    //             rotation: Quat::default(),
-    //             scale: Vec3 { x: 6.0, y: 6.0, z: 6.0 }
-    //         },
-    //         ..default()
-    //     },
-    //     animation_indices,
-    //     AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-    //     ControllablePlayer {},
-    // ));
+    commands.spawn((
+        Camera2dBundle::default(), 
+        PlayerCamera
+    ));
 
-    // commands.spawn((Text2dBundle {
-    //     text: Text::from_section(
-    //         client_id.0.to_string(), 
-    //     TextStyle {
-    //         font: asset_server.load(FONT_PATH),
-    //         font_size : 20.0,
-    //         ..default()
-    //     },
-    //     ).with_alignment(TextAlignment::Center),
-    //     ..Default::default()
-    // },
-    //     PlayerLabel,
-    // ));
+    commands.spawn((Text2dBundle {
+            text: Text::from_section(
+                client_id.0.to_string(), 
+            TextStyle {
+                font: asset_server.load(FONT_PATH),
+                font_size : 20.0,
+                ..default()
+            },
+            ).with_alignment(TextAlignment::Center),
+            ..Default::default()
+        },
+            PlayerLabel,
+        ));
 }
 
 fn animate_sprite(
@@ -303,6 +326,21 @@ fn animate_sprite(
             } else {
                 sprite.index + 1
             };
+        }
+    }
+}
+
+fn camera_follow_player(
+    player_query: Query<(&Transform, With<ControllablePlayer>)>,
+    mut camera_query: Query<(&mut Transform, &PlayerCamera), Without<ControllablePlayer>>,
+) {
+    if let Ok(player_transform) = player_query.get_single() {
+        if let Ok(mut camera_tranform) = camera_query.get_single_mut() {
+            camera_tranform.0.translation = Vec3::lerp(
+                camera_tranform.0.translation, 
+                player_transform.0.translation.extend(camera_tranform.0.translation.z).truncate(), 
+                0.3
+            );
         }
     }
 }
