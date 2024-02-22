@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_game_client::{connection_config, ClientChannel, NetworkedEntities, Player, PlayerInput, ServerChannel, ServerMessages, Velocity, PROTOCOL_ID};
 use bevy_renet::{renet::{transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig}, ClientId, RenetServer, ServerEvent}, transport::NetcodeServerPlugin, RenetServerPlugin};
 
-const PLAYER_SPEED: f32 = 500.0;
+const PLAYER_SPEED: f32 = 300.0;
 
 #[derive(Debug, Default, Resource)]
 pub struct ServerLobby {

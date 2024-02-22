@@ -15,6 +15,9 @@ struct MapData {
     height: usize
 }
 
+#[derive(Component)]
+pub struct TileCollider;
+
 #[derive(Default, Resource)]
 struct MapSpriteAtlas {
     handle: Handle<TextureAtlas>,
@@ -26,7 +29,6 @@ impl Plugin for TileMapPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, generate_tile_textureatlas)
             .add_systems(Startup, setup)
-            .add_systems(Startup, generate_tile_textureatlas)
             .add_systems(Startup, generate_map);
             
 
@@ -66,8 +68,8 @@ fn generate_tile_textureatlas(
     }
     map_data.width = columns / rows;
     map_data.height = rows;
-    println!("Map data width: {}", map_data.width);
-    println!("Map data height: {}", map_data.height);
+    println!("Width: {}", map_data.width);
+    println!("Height: {}", map_data.height);
     println!("Successfully read file: {}", MAP_FILE_PATH);
 }   
 
@@ -79,9 +81,6 @@ fn generate_map(
     let mut column: usize = 0;
     let mut row: usize = 0;
     for c in &map_data.data {
-        println!("Row: {}", row);
-        println!("Column: {}", column);
-
         if column == map_data.width {
             column = 0;
             row += 1;
@@ -91,13 +90,14 @@ fn generate_map(
                 texture_atlas: map_sprites.handle.clone(),
                 sprite: TextureAtlasSprite::new(1),
                 transform: Transform {
-                    translation: Vec3 { x: column as f32 * TILE_SIZE * 6.0, y: row as f32 * TILE_SIZE * 6.0, z: 0.0 },
+                    translation: Vec3 { x: column as f32 * TILE_SIZE * 6.0, y: row as f32 * TILE_SIZE * 6.0, z: -0.5 },
                     rotation: Quat::default(),
                     scale: Vec3 { x: 6.0, y: 6.0, z: 6.0 }
                 },
                 ..Default::default()
             })
-            .insert(GlobalTransform::default());
+            .insert(GlobalTransform::default())
+            .insert(TileCollider);
         }
         else if *c == '.' {
             commands.spawn(SpriteSheetBundle {
@@ -110,7 +110,8 @@ fn generate_map(
                 },
                 ..Default::default()
             })
-            .insert(GlobalTransform::default());
+            .insert(GlobalTransform::default())
+            .insert(TileCollider);
         }
         column += 1;
     }

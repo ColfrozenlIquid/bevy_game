@@ -1,14 +1,14 @@
 use std::{net::UdpSocket, time::{SystemTime, UNIX_EPOCH}};
-use bevy::{prelude::*, utils::HashMap};
-use bevy_game_client::{connection_config, debug, tilemap, ClientChannel, NetworkedEntities, PlayerInput, ServerChannel, ServerMessages, PROTOCOL_ID};
+use bevy::{prelude::*, sprite::collide_aabb::collide, utils::HashMap};
+use bevy_game_client::{connection_config, debug, tilemap, ClientChannel, NetworkedEntities, Player, PlayerInput, ServerChannel, ServerMessages, PROTOCOL_ID};
 use bevy_renet::{client_connected, renet::{transport::{ClientAuthentication, NetcodeClientTransport, NetcodeTransportError}, ClientId, RenetClient}, transport::NetcodeClientPlugin, RenetClientPlugin};
 
 use debug::DebugPlugin;
-use tilemap::TileMapPlugin;
+use tilemap::{TileMapPlugin, TileCollider};
 
 const SPRITE_PATH: &str = ".\\sprites\\vampire_v1_1_animated.png";
 const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
-const PLAYER_SPEED: f32 = 500.0;
+const PLAYER_SPEED: f32 = 300.0;
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
 
 #[derive(Component, Default)]
@@ -90,7 +90,7 @@ fn main() {
         animate_sprite, 
         label_movement,
         camera_follow_player
-    ).chain());
+    ));
 
     app.run();
 }
@@ -164,6 +164,24 @@ fn initialise_renet_transport_client(app: &mut App) {
     app.add_systems(Update, panic_on_error_system);
 
     println!("Successfully initialised Renet client.")
+}
+
+fn wall_collision(
+    player_pos: Vec3,
+    wall_query: Query<&Transform, (With<TileCollider>, Without<Player>)>
+) -> bool {
+    for wall_transform in wall_query.iter() {
+        let collision = collide(
+            player_pos, 
+            Vec2::splat(16.0 * 6.0 * 0.9), 
+            wall_transform.translation, 
+            Vec2::splat(16.0 * 6.0)
+        );
+        if collision.is_some() {
+            return false;
+        }
+    }
+    return true;
 }
 
 fn keyboard_input_system(
