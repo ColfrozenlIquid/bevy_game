@@ -1,26 +1,19 @@
 use std::{net::UdpSocket, time::{SystemTime, UNIX_EPOCH}};
 use bevy::{prelude::*, sprite::collide_aabb::collide, utils::HashMap};
-use bevy_game_client::{connection_config, debug, tilemap, ClientChannel, NetworkedEntities, Player, PlayerInput, ServerChannel, ServerMessages, PROTOCOL_ID};
+use bevy_game_client::{connection_config, debug, mainmenu, splashscreen, tilemap, ClientChannel, GameState, NetworkedEntities, Player, PlayerInput, PlayerPosition, ServerChannel, ServerMessages, PROTOCOL_ID};
 use bevy_renet::{client_connected, renet::{transport::{ClientAuthentication, NetcodeClientTransport, NetcodeTransportError}, ClientId, RenetClient}, transport::NetcodeClientPlugin, RenetClientPlugin};
 
 use debug::DebugPlugin;
 use tilemap::{TileMapPlugin, TileCollider};
 
-const SPRITE_PATH: &str = ".\\sprites\\vampire_v1_1_animated.png";
+const PLAYER_SPRITE_PATH: &str = ".\\sprites\\vampire_v1_1_animated.png";
 const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
 const PLAYER_SPEED: f32 = 300.0;
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
+const GAME_CURSOR_SPRITE_PATH: &str = ".\\sprites\\cursor_200.png";
 
 #[derive(Component, Default)]
 struct PlayerCamera;
-
-#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-enum GameState {
-    #[default]
-    Splash,
-    Menu,
-    Game,
-}
 
 #[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
 struct Volume(u32);
@@ -37,6 +30,11 @@ struct PlayerLabel;
 #[derive(Default, Resource)]
 struct PlayerSpriteAtlas {
     handle: Handle<TextureAtlas>,
+}
+
+#[derive(Default, Resource)]
+struct GameCursorAtlas {
+    handle: Handle<TextureAtlas>
 }
 
 #[derive(Debug)]
@@ -68,26 +66,37 @@ struct AnimationIndices {
 #[derive(Component, Deref, DerefMut)]
 struct AnimationTimer(Timer);
 
+#[derive(Component)]
+struct GameCursor;
+
 fn main() {
     let mut app = App::new();
 
     app.add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(RenetClientPlugin)
         .add_plugins(TileMapPlugin)
-        .add_plugins(DebugPlugin);
+        .add_plugins(DebugPlugin)
+        .add_plugins(mainmenu::menu::MenuPlugin)
+        .add_plugins(splashscreen::splash::SplashPlugin)
+        .add_state::<GameState>();
 
     initialise_renet_transport_client(&mut app);
 
     app.insert_resource(ClientLobby::default());
     app.insert_resource(PlayerInput::default());
+    app.insert_resource(PlayerPosition::default());
     app.insert_resource(NetworkMapping::default());
     app.insert_resource(PlayerSpriteAtlas::default());
+    app.insert_resource(GameCursorAtlas::default());
 
-    app.add_systems(Startup, setup);
+    app.add_systems(Startup, (setup, setup_game_cursor));
+    app.add_systems(Startup, get_window);
     app.add_systems(Update, (
-        keyboard_input_system, 
-        (client_send_input, client_sync_players).in_set(Connected),
-        animate_sprite, 
+        move_cursor,
+        keyboard_input_system,
+        (client_send_input, client_sync_players, client_send_position).in_set(Connected),
+        animate_sprite,
+        move_player,
         label_movement,
         camera_follow_player
     ));
@@ -95,39 +104,39 @@ fn main() {
     app.run();
 }
 
-fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
-    for entity in &to_despawn {
-        commands.entity(entity).despawn_recursive();
-    }
+fn setup_game_cursor(
+    mut windows: Query<&mut Window>,
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    let mut window: Mut<Window> = windows.single_mut();
+    window.cursor.visible = false;
+
+    commands.spawn(
+        (ImageBundle {
+            image: asset_server.load(GAME_CURSOR_SPRITE_PATH).into(),
+            style: Style {
+                position_type: PositionType::Absolute,
+                ..Default::default()
+            },
+            z_index: ZIndex::Global(15),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            ..Default::default()
+        },
+        GameCursor
+    ));
+    println!("Spawned cursor sprite");
 }
 
-mod splash {
-    use bevy::prelude::*;
-    use super::{despawn_screen, GameState};
-
-    pub struct SplashPlugin;
-
-    impl Plugin for SplashPlugin {
-        fn build(&self, app: &mut App) {
-            app
-                //.add_systems(OnEnter(GameState::Splash), splash_setup)
-                .add_systems(Update, countdown.run_if(in_state(GameState::Splash)))
-                .add_systems(OnExit(GameState::Splash), despawn_screen::<OnSplashScreen>);
-        }
-    }
-
-    #[derive(Component)]
-    struct OnSplashScreen;
-
-    #[derive(Resource, Deref, DerefMut)]
-    struct SplashTimer(Timer);
-
-    // fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    //     // let icon = asset_server.load(path)
-    // }
-
-    fn countdown() {
-
+fn move_cursor(
+    window: Query<&Window>,
+    mut cursor: Query<&mut Style, With<GameCursor>>
+) {
+    let window: &Window = window.single();
+    if let Some(position) = window.cursor_position() {
+        let mut img_transform= cursor.single_mut();
+        img_transform.left = Val::Px(position.x);
+        img_transform.top = Val::Px(position.y);
     }
 }
 
@@ -166,9 +175,16 @@ fn initialise_renet_transport_client(app: &mut App) {
     println!("Successfully initialised Renet client.")
 }
 
+fn get_window(window: Query<&Window>) {
+    let window = window.single();
+    let width = window.width();
+    let height = window.height();
+    dbg!(width, height);
+}
+
 fn wall_collision(
     player_pos: Vec3,
-    wall_query: Query<&Transform, (With<TileCollider>, Without<Player>)>
+    wall_query: &Query<&Transform, (With<TileCollider>, Without<Player>)>
 ) -> bool {
     for wall_transform in wall_query.iter() {
         let collision = collide(
@@ -187,9 +203,39 @@ fn wall_collision(
 fn keyboard_input_system(
     keyboard_input: Res<Input<KeyCode>>, 
     mut player_input: ResMut<PlayerInput>,
-    mut sprite_query: Query<&mut TextureAtlasSprite>
+    mut player_position: ResMut<PlayerPosition>,
+    mut sprite_query: Query<&mut TextureAtlasSprite>,
+    wall_query: Query<&Transform, (With<TileCollider>, Without<Player>)>
 ) {
+    let mut direction = Vec3::ZERO;
+    let current_position = player_position.transform;
 
+
+    if keyboard_input.pressed(KeyCode::A) {
+        if wall_collision(current_position + Vec3::new(-2.0, 0.0, 0.0), &wall_query) {
+            direction.x -= 1.0;
+        }
+    }
+
+    if keyboard_input.pressed(KeyCode::D) {
+        if wall_collision(current_position + Vec3::new(2.0, 0.0, 0.0), &wall_query) {
+            direction.x += 1.0;
+        }
+    }
+
+    if keyboard_input.pressed(KeyCode::W) {
+        if wall_collision(current_position + Vec3::new(0.0, 2.0, 0.0), &wall_query) {
+            direction.y += 1.0;
+        }
+    }
+
+    if keyboard_input.pressed(KeyCode::S) {
+        if wall_collision(current_position + Vec3::new(0.0, -2.0, 0.0), &wall_query) {
+            direction.y -= 1.0;
+        }
+    }
+
+    
     player_input.left = keyboard_input.pressed(KeyCode::A) || keyboard_input.pressed(KeyCode::Left);
     player_input.right = keyboard_input.pressed(KeyCode::D) || keyboard_input.pressed(KeyCode::Right);
     player_input.up = keyboard_input.pressed(KeyCode::W) || keyboard_input.pressed(KeyCode::Up);
@@ -202,6 +248,8 @@ fn keyboard_input_system(
             sprite.flip_x = false;
         }
     }
+    
+    player_position.transform += direction * 5.0;
 }
 
 fn label_movement(
@@ -222,6 +270,17 @@ fn label_movement(
 fn client_send_input(player_input: Res<PlayerInput>, mut client: ResMut<RenetClient>) {
     let input_message = bincode::serialize(&*player_input).unwrap();
     client.send_message(ClientChannel::Input, input_message)
+}
+
+fn client_send_position(player_position: Res<PlayerPosition>, mut client: ResMut<RenetClient>) {
+    let position_message = bincode::serialize(&*player_position).unwrap();
+    client.send_message(ClientChannel::Position, position_message);
+}
+
+fn move_player(mut player_query: Query<(&mut Transform, &ControllablePlayer)>, player_position: Res<PlayerPosition>) {
+    for mut player_query in player_query.iter_mut() {
+        player_query.0.translation = player_position.transform;
+    }
 }
 
 fn client_sync_players(
@@ -252,6 +311,7 @@ fn client_sync_players(
                     },
                     // PlayerLabel,
                     animation_indices.clone(),
+                    PlayerPosition::default(),
                     AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
                 ));
 
@@ -299,13 +359,13 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    mut player_sprite: ResMut<PlayerSpriteAtlas>, 
+    mut player_sprite: ResMut<PlayerSpriteAtlas>,
+    mut cursor_sprite: ResMut<GameCursorAtlas>,
     client_id : ResMut<CurrentClientId>,
 ) {
-    let texture_handle = asset_server.load(SPRITE_PATH);
+    let texture_handle = asset_server.load(PLAYER_SPRITE_PATH);
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(16.0, 16.0), 4, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    
     player_sprite.handle = texture_atlas_handle.clone();
     
     commands.spawn((

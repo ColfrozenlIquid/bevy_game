@@ -7,6 +7,8 @@ use bevy::{prelude::*, transform::commands};
 const MAP_FILE_PATH: &str = "assets/map/map1.txt";
 const MAP_SPRITE_PATH: &str = "./sprites/character and tileset/Dungeon_Tileset.png";
 const TILE_SIZE: f32 = 16.0;
+const OFFSET_X: f32 = 200.0;
+const OFFSET_Y: f32 = 200.0;
 
 #[derive(Resource, Default)]
 struct MapData {
@@ -90,7 +92,7 @@ fn generate_map(
                 texture_atlas: map_sprites.handle.clone(),
                 sprite: TextureAtlasSprite::new(1),
                 transform: Transform {
-                    translation: Vec3 { x: column as f32 * TILE_SIZE * 6.0, y: row as f32 * TILE_SIZE * 6.0, z: -0.5 },
+                    translation: Vec3 { x: column as f32 * TILE_SIZE * 6.0 - OFFSET_X, y: row as f32 * TILE_SIZE * 6.0 - OFFSET_Y, z: -0.5 },
                     rotation: Quat::default(),
                     scale: Vec3 { x: 6.0, y: 6.0, z: 6.0 }
                 },
@@ -104,14 +106,14 @@ fn generate_map(
                 texture_atlas: map_sprites.handle.clone(),
                 sprite: TextureAtlasSprite::new(6),
                 transform: Transform {
-                    translation: Vec3 { x: column as f32 * TILE_SIZE * 6.0, y: row as f32 * TILE_SIZE * 6.0, z: -0.5 },
+                    translation: Vec3 { x: column as f32 * TILE_SIZE * 6.0 - OFFSET_X, y: row as f32 * TILE_SIZE * 6.0 - OFFSET_Y, z: -0.5 },
                     rotation: Quat::default(),
                     scale: Vec3 { x: 6.0, y: 6.0, z: 6.0 }
                 },
                 ..Default::default()
             })
-            .insert(GlobalTransform::default())
-            .insert(TileCollider);
+            .insert(GlobalTransform::default());
+            // .insert(TileCollider);
         }
         column += 1;
     }

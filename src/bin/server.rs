@@ -1,7 +1,7 @@
 use std::{collections::HashMap, net::UdpSocket, time::SystemTime};
 
 use bevy::prelude::*;
-use bevy_game_client::{connection_config, ClientChannel, NetworkedEntities, Player, PlayerInput, ServerChannel, ServerMessages, Velocity, PROTOCOL_ID};
+use bevy_game_client::{connection_config, ClientChannel, NetworkedEntities, Player, PlayerInput, PlayerPosition, ServerChannel, ServerMessages, Velocity, PROTOCOL_ID};
 use bevy_renet::{renet::{transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig}, ClientId, RenetServer, ServerEvent}, transport::NetcodeServerPlugin, RenetServerPlugin};
 
 const PLAYER_SPEED: f32 = 300.0;
@@ -48,7 +48,7 @@ fn main() {
     // app.add_systems(Startup, setup);
     // app.add_systems(Update, animate_sprite);
 
-    app.add_systems(Update, (server_update_system, server_network_sync, move_players_system, spawn_bot));
+    app.add_systems(Update, (server_update_system, server_network_sync, move_players_system, spawn_bot, apply_position_system));
 
     app.add_systems(FixedUpdate, apply_velocity_system);
 
@@ -114,7 +114,8 @@ fn server_update_system(
                     ..Default::default()
                 },)
                     .insert(PlayerInput::default())
-                    .insert(Velocity::default())
+                    //.insert(Velocity::default())
+                    .insert(PlayerPosition::default())
                     .insert(Player {id: *client_id})
                     .id();
                 println!("generated player entity");
@@ -140,10 +141,10 @@ fn server_update_system(
         }
     }
     for client_id in server.clients_id() {
-        while let Some(message) = server.receive_message(client_id, ClientChannel::Input) {
-            let input: PlayerInput = bincode::deserialize(&message).unwrap();
+        while let Some(message) = server.receive_message(client_id, ClientChannel::Position) {
+            let player_position: PlayerPosition = bincode::deserialize(&message).unwrap();
             if let Some(player_entity) = lobby.players.get(&client_id) {
-                commands.entity(*player_entity).insert(input);
+                commands.entity(*player_entity).insert(player_position);
             }
         }
     }
@@ -173,6 +174,12 @@ fn move_players_system(mut query: Query<(&mut Velocity, &PlayerInput)>) {
 fn apply_velocity_system(mut query: Query<(&Velocity, &mut Transform)>, time: Res<Time>) {
     for (velocity, mut transform) in query.iter_mut() {
         transform.translation += velocity.0 * time.delta_seconds();
+    }
+}
+
+fn apply_position_system(mut query: Query<(&PlayerPosition, &mut Transform)>) {
+    for (player_position, mut player_transform) in query.iter_mut() {
+        player_transform.translation = player_position.transform;
     }
 }
 

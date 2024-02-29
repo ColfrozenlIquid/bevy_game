@@ -1,17 +1,32 @@
 pub mod debug;
 pub mod tilemap;
+pub mod mainmenu;
+pub mod splashscreen;
 
 use std::time::Duration;
 
-use bevy::{ecs::{component::Component, entity::Entity, event::Event, system::Resource}, math::Vec3};
+use bevy::{ecs::{component::Component, entity::Entity, event::Event, schedule::States, system::Resource}, math::Vec3};
 use bevy_renet::renet::{ChannelConfig, ClientId, ConnectionConfig, SendType};
 use serde::{Deserialize, Serialize};
 
 pub const PROTOCOL_ID: u64 = 7;
 
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum GameState {
+    #[default]
+    Splash,
+    Menu,
+    Game,
+}
+
 #[derive(Debug, Component)]
 pub struct Player {
     pub id: ClientId
+}
+
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize, Component, Resource)]
+pub struct PlayerPosition {
+    pub transform: Vec3,
 }
 
 #[derive(Debug, Default, Component)]
@@ -35,6 +50,7 @@ pub struct NetworkedEntities {
 pub enum ClientChannel {
     Input,
     Command,
+    Position,
 }
 pub enum ServerChannel {
     ServerMessages,
@@ -58,6 +74,7 @@ impl From<ClientChannel> for u8 {
         match channel_id {
             ClientChannel::Command => 0,
             ClientChannel::Input => 1,
+            ClientChannel::Position => 3,
         }
     }
 }
@@ -74,6 +91,13 @@ impl ClientChannel {
             },
             ChannelConfig {
                 channel_id: Self::Command.into(),
+                max_memory_usage_bytes: 5 * 1024 * 1024,
+                send_type: SendType::ReliableOrdered { 
+                    resend_time: Duration::ZERO 
+                }
+            },
+            ChannelConfig {
+                channel_id: Self::Position.into(),
                 max_memory_usage_bytes: 5 * 1024 * 1024,
                 send_type: SendType::ReliableOrdered { 
                     resend_time: Duration::ZERO 
