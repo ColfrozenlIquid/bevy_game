@@ -11,7 +11,7 @@ pub mod splash {
     use bevy::prelude::*;
     use super::{despawn_screen, GameState};
 
-    const SPLASH_SCREEN_PATH: &str = "splashscreen/splash_black.png";
+    const SPLASH_SCREEN_PATH: &str = "splashscreen/splash_screen.png";
 
     pub struct SplashPlugin;
 
@@ -42,7 +42,7 @@ pub mod splash {
             },
             OnSplashScreen,
         ));
-        commands.insert_resource(SplashTimer(Timer::from_seconds(0.5, TimerMode::Once)));
+        commands.insert_resource(SplashTimer(Timer::from_seconds(3.0, TimerMode::Once)));
     }
 
     fn countdown(

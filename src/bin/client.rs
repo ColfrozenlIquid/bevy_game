@@ -1,6 +1,6 @@
 use std::{net::UdpSocket, time::{SystemTime, UNIX_EPOCH}};
-use bevy::{prelude::*, sprite::collide_aabb::collide, utils::HashMap};
-use bevy_game_client::{connection_config, debug, mainmenu, splashscreen, tilemap, ClientChannel, GameState, NetworkedEntities, Player, PlayerInput, PlayerPosition, ServerChannel, ServerMessages, PROTOCOL_ID};
+use bevy::{prelude::*, sprite::collide_aabb::collide, transform, utils::HashMap};
+use bevy_game_client::{connection_config, debug, mainmenu::{self, menu::ButtonText}, splashscreen, tilemap, ClientChannel, GameState, NetworkedEntities, Player, PlayerInput, PlayerPosition, ServerChannel, ServerMessages, PROTOCOL_ID};
 use bevy_renet::{client_connected, renet::{transport::{ClientAuthentication, NetcodeClientTransport, NetcodeTransportError}, ClientId, RenetClient}, transport::NetcodeClientPlugin, RenetClientPlugin};
 
 use debug::DebugPlugin;
@@ -30,11 +30,6 @@ struct PlayerLabel;
 #[derive(Default, Resource)]
 struct PlayerSpriteAtlas {
     handle: Handle<TextureAtlas>,
-}
-
-#[derive(Default, Resource)]
-struct GameCursorAtlas {
-    handle: Handle<TextureAtlas>
 }
 
 #[derive(Debug)]
@@ -87,7 +82,6 @@ fn main() {
     app.insert_resource(PlayerPosition::default());
     app.insert_resource(NetworkMapping::default());
     app.insert_resource(PlayerSpriteAtlas::default());
-    app.insert_resource(GameCursorAtlas::default());
 
     app.add_systems(Startup, (setup, setup_game_cursor));
     app.add_systems(Startup, get_window);
@@ -360,7 +354,6 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut player_sprite: ResMut<PlayerSpriteAtlas>,
-    mut cursor_sprite: ResMut<GameCursorAtlas>,
     client_id : ResMut<CurrentClientId>,
 ) {
     let texture_handle = asset_server.load(PLAYER_SPRITE_PATH);
