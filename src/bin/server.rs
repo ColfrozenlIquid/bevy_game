@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_game_client::{connection_config, ClientChannel, NetworkedEntities, Player, PlayerInput, PlayerPosition, ServerChannel, ServerMessages, Velocity, PROTOCOL_ID};
 use bevy_renet::{renet::{transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig}, ClientId, RenetServer, ServerEvent}, transport::NetcodeServerPlugin, RenetServerPlugin};
 
-const PLAYER_SPEED: f32 = 300.0;
+const PLAYER_SPEED: f32 = 500.0;
 
 #[derive(Debug, Default, Resource)]
 pub struct ServerLobby {
@@ -107,7 +107,7 @@ fn server_update_system(
                     texture_atlas: player_sprite.handle.clone(),
                     sprite: TextureAtlasSprite::new(animation_indices.first),
                     transform: Transform {
-                        translation: Vec3::ZERO,
+                        translation: Vec3::new(0.0, 0.0, 1.0),
                         rotation: Quat::default(),
                         scale: Vec3 { x: 6.0, y: 6.0, z: 6.0 }
                     },
@@ -115,7 +115,7 @@ fn server_update_system(
                 },)
                     .insert(PlayerInput::default())
                     //.insert(Velocity::default())
-                    .insert(PlayerPosition::default())
+                    .insert(PlayerPosition { transform: Vec3::new(0.0, 0.0, 1.0)})
                     .insert(Player {id: *client_id})
                     .id();
                 println!("generated player entity");

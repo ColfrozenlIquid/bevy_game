@@ -1,16 +1,23 @@
 use std::{net::UdpSocket, time::{SystemTime, UNIX_EPOCH}};
-use bevy::{prelude::*, sprite::collide_aabb::collide, transform, utils::HashMap};
-use bevy_game_client::{connection_config, debug, mainmenu::{self, menu::ButtonText}, splashscreen, tilemap, ClientChannel, GameState, NetworkedEntities, Player, PlayerInput, PlayerPosition, ServerChannel, ServerMessages, PROTOCOL_ID};
+use bevy::{input::mouse::MouseButtonInput, prelude::*, sprite::collide_aabb::collide, transform::commands, utils::HashMap, window::PrimaryWindow};
+use bevy_egui::egui::epaint::text::cursor;
+use bevy_game_client::{connection_config, debug, mainmenu::{self}, splashscreen, tilemap, ClientChannel, GameState, NetworkedEntities, Player, PlayerInput, PlayerPosition, ServerChannel, ServerMessages, PROTOCOL_ID};
+
 use bevy_renet::{client_connected, renet::{transport::{ClientAuthentication, NetcodeClientTransport, NetcodeTransportError}, ClientId, RenetClient}, transport::NetcodeClientPlugin, RenetClientPlugin};
+use bevy_ecs_ldtk::prelude::*;
 
 use debug::DebugPlugin;
 use tilemap::{TileMapPlugin, TileCollider};
 
+const SWORD_SPRITE_PATH: &str = ".\\sprites\\sword_anim.png";
 const PLAYER_SPRITE_PATH: &str = ".\\sprites\\vampire_v1_1_animated.png";
 const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
-const PLAYER_SPEED: f32 = 300.0;
+const PLAYER_SPEED: f32 = 500.0;
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
-const GAME_CURSOR_SPRITE_PATH: &str = ".\\sprites\\cursor_200.png";
+const GAME_CURSOR_SPRITE_PATH: &str = ".\\sprites\\cursor\\cursor_hand_200.png";
+const LEVEL_0_PATH: &str = ".\\level\\level_0.ldtk";
+
+const SCALE: f32 = 5.0;
 
 #[derive(Component, Default)]
 struct PlayerCamera;
@@ -32,6 +39,11 @@ struct PlayerSpriteAtlas {
     handle: Handle<TextureAtlas>,
 }
 
+#[derive(Default, Resource)]
+struct SwordSpriteAtlas {
+    handle: Handle<TextureAtlas>
+}
+
 #[derive(Debug)]
 struct PlayerInfo {
     client_entity: Entity,
@@ -48,6 +60,11 @@ struct ClientLobby {
 
 #[derive(Debug, Resource)]
 struct CurrentClientId(u64);
+
+#[derive(Component)]
+struct Sword {
+    curent_index: usize,
+}
 
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Connected;
@@ -69,25 +86,30 @@ fn main() {
 
     app.add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(RenetClientPlugin)
-        .add_plugins(TileMapPlugin)
+        //.add_plugins(TileMapPlugin)
         .add_plugins(DebugPlugin)
         .add_plugins(mainmenu::menu::MenuPlugin)
         .add_plugins(splashscreen::splash::SplashPlugin)
+        .add_plugins(LdtkPlugin)
         .add_state::<GameState>();
 
     initialise_renet_transport_client(&mut app);
 
     app.insert_resource(ClientLobby::default());
     app.insert_resource(PlayerInput::default());
-    app.insert_resource(PlayerPosition::default());
+    app.insert_resource(PlayerPosition { transform: Vec3::new(0.0, 0.0, 1.0)});
     app.insert_resource(NetworkMapping::default());
     app.insert_resource(PlayerSpriteAtlas::default());
+    app.insert_resource(SwordSpriteAtlas::default());
+    app.insert_resource(LevelSelection::index(0));
 
     app.add_systems(Startup, (setup, setup_game_cursor));
     app.add_systems(Startup, get_window);
     app.add_systems(Update, (
         move_cursor,
         keyboard_input_system,
+        mouse_button_input_system,
+        despawn_sword_animation,
         (client_send_input, client_sync_players, client_send_position).in_set(Connected),
         animate_sprite,
         move_player,
@@ -183,7 +205,7 @@ fn wall_collision(
     for wall_transform in wall_query.iter() {
         let collision = collide(
             player_pos, 
-            Vec2::splat(16.0 * 6.0 * 0.9), 
+            Vec2::splat(16.0 * 6.0 * 0.5), 
             wall_transform.translation, 
             Vec2::splat(16.0 * 6.0)
         );
@@ -246,6 +268,63 @@ fn keyboard_input_system(
     player_position.transform += direction * 5.0;
 }
 
+fn mouse_button_input_system(
+    mouse_input: Res<Input<MouseButton>>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    camera_query: Query<(&Camera, &GlobalTransform), With<PlayerCamera>>,
+    mut commands: Commands,
+    sword_sprite: Res<SwordSpriteAtlas>,
+) {
+    let (camera, camera_transform) = camera_query.single();
+    let window = window_query.single();
+
+    if mouse_input.just_pressed(MouseButton::Right) {
+        if let Some(world_position) = window.cursor_position()
+            .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
+            .map(|ray| ray.origin.truncate()) {
+                println!("Pressed left mouse button");
+                println!("Cursor position is: {},{}", world_position.x, world_position.y);
+                attack_animation(&mut commands, &sword_sprite, &world_position, &camera_transform.translation());
+        }
+    }    
+}
+
+fn attack_animation(
+    commands: &mut Commands,
+    sword_sprite: &Res<SwordSpriteAtlas>,
+    position_cursor: &Vec2,
+    position_player: &Vec3,
+) {
+    let animation_indices = AnimationIndices { first: 0, last: 4};
+
+    commands.spawn((
+        SpriteSheetBundle {
+            texture_atlas: sword_sprite.handle.clone(),
+            sprite: TextureAtlasSprite::new(animation_indices.first),
+            transform: Transform {
+                translation: Vec3::new(position_player.x, position_player.y, 1.0),
+                scale: Vec3::new(SCALE/2.0, SCALE/2.0, 1.0),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+        Sword{ curent_index: 0 },
+        animation_indices.clone(),
+        AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
+    ));
+}
+
+fn despawn_sword_animation(
+    mut commands: Commands,
+    entity_query: Query<(Entity, &TextureAtlasSprite), With<Sword>>
+) {
+    for (entity, sprite) in entity_query.iter() {
+        if sprite.index == 4 {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
 fn label_movement(
     mut set: ParamSet<(
         Query<(&Transform, &ControllablePlayer), Without<PlayerLabel>>,
@@ -297,9 +376,9 @@ fn client_sync_players(
                         texture_atlas: player_sprite.handle.clone(),
                         sprite: TextureAtlasSprite::new(animation_indices.first),
                         transform: Transform {
-                            translation: Vec3 { x: translation[0], y: translation[1], z: translation[2] },
+                            translation: Vec3 { x: translation[0], y: translation[1], z: 1.0 },
                             rotation: Quat::default(),
-                            scale: Vec3 { x: 3.0, y: 3.0, z: 3.0 }
+                            scale: Vec3 { x: SCALE, y: SCALE, z: SCALE }
                         },
                         ..Default::default()
                     },
@@ -340,7 +419,7 @@ fn client_sync_players(
                 let translation = networked_entities.translation[i].into();
                 let transform = Transform {
                     translation: translation,
-                    scale: Vec3 { x: 6.0, y: 6.0, z: 6.0 },
+                    scale: Vec3 { x: SCALE, y: SCALE, z: 1.0 },
                     ..Default::default()
                 };
                 commands.entity(*entity).insert(transform);
@@ -354,12 +433,33 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut player_sprite: ResMut<PlayerSpriteAtlas>,
+    mut sword_sprite: ResMut<SwordSpriteAtlas>,
     client_id : ResMut<CurrentClientId>,
 ) {
-    let texture_handle = asset_server.load(PLAYER_SPRITE_PATH);
-    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(16.0, 16.0), 4, 1, None, None);
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    player_sprite.handle = texture_atlas_handle.clone();
+
+    commands.spawn(LdtkWorldBundle {
+        ldtk_handle: asset_server.load(LEVEL_0_PATH),
+        transform: Transform {
+            translation: Vec3::new(-1000.0, -1200.0, -1.0),
+            scale: Vec3::new(SCALE, SCALE, 1.0),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+
+    {
+        let texture_handle = asset_server.load(PLAYER_SPRITE_PATH);
+        let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(16.0, 16.0), 4, 1, None, None);
+        let texture_atlas_handle = texture_atlases.add(texture_atlas);
+        player_sprite.handle = texture_atlas_handle.clone();
+    }
+
+    {
+        let texture_handle = asset_server.load(SWORD_SPRITE_PATH);
+        let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64.0, 64.0), 5, 1, None, None);
+        let texture_atlas_handle = texture_atlases.add(texture_atlas);
+        sword_sprite.handle = texture_atlas_handle.clone();
+    }
     
     commands.spawn((
         Camera2dBundle::default(), 
@@ -383,11 +483,7 @@ fn setup(
 
 fn animate_sprite(
     time: Res<Time>,
-        mut query: Query<(
-            &AnimationIndices,
-            &mut AnimationTimer,
-            &mut TextureAtlasSprite
-        )>,
+    mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlasSprite)>,
 ) {
     for (indices, mut timer, mut sprite) in &mut query {
         timer.tick(time.delta());

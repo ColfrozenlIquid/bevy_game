@@ -1,14 +1,13 @@
-use std::process::Command;
 use std::io::{BufRead, BufReader};
 use std::fs::File;
 
-use bevy::{prelude::*, transform::commands};
+use bevy::prelude::*;
 
 const MAP_FILE_PATH: &str = "assets/map/map1.txt";
 const MAP_SPRITE_PATH: &str = "./sprites/character and tileset/Dungeon_Tileset.png";
 const TILE_SIZE: f32 = 16.0;
-const OFFSET_X: f32 = 200.0;
-const OFFSET_Y: f32 = 200.0;
+const OFFSET_X: f32 = -200.0;
+const OFFSET_Y: f32 = -200.0;
 
 #[derive(Resource, Default)]
 struct MapData {
@@ -29,11 +28,8 @@ pub struct TileMapPlugin;
 
 impl Plugin for TileMapPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, generate_tile_textureatlas)
-            .add_systems(Startup, setup)
-            .add_systems(Startup, generate_map);
+        app.add_systems(Startup, (setup, generate_tile_textureatlas, generate_map).chain());
             
-
         app.insert_resource(MapData::default())
             .insert_resource(MapSpriteAtlas::default());
     }
@@ -70,9 +66,6 @@ fn generate_tile_textureatlas(
     }
     map_data.width = columns / rows;
     map_data.height = rows;
-    println!("Width: {}", map_data.width);
-    println!("Height: {}", map_data.height);
-    println!("Successfully read file: {}", MAP_FILE_PATH);
 }   
 
 fn generate_map(
@@ -80,6 +73,8 @@ fn generate_map(
     map_data: Res<MapData>,
     map_sprites: Res<MapSpriteAtlas>
 ) {
+    println!("Map width: {:?}", map_data.width);
+    println!("Map height: {:?}", map_data.height);
     let mut column: usize = 0;
     let mut row: usize = 0;
     for c in &map_data.data {

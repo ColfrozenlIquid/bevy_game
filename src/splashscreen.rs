@@ -42,7 +42,7 @@ pub mod splash {
             },
             OnSplashScreen,
         ));
-        commands.insert_resource(SplashTimer(Timer::from_seconds(3.0, TimerMode::Once)));
+        commands.insert_resource(SplashTimer(Timer::from_seconds(0.5, TimerMode::Once)));
     }
 
     fn countdown(
