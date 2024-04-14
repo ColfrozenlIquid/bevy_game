@@ -2,6 +2,7 @@ pub mod debug;
 pub mod tilemap;
 pub mod mainmenu;
 pub mod splashscreen;
+pub mod level;
 
 use std::time::Duration;
 
