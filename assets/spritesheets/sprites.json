@@ -1,0 +1,2721 @@
+[
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "angel_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "angel_idle_anim",
+        0
+      ],
+      [
+        "angel_idle_anim",
+        1
+      ],
+      [
+        "angel_idle_anim",
+        2
+      ],
+      [
+        "angel_idle_anim",
+        3
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "angel_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "angel_run_anim",
+        4
+      ],
+      [
+        "angel_run_anim",
+        5
+      ],
+      [
+        "angel_run_anim",
+        6
+      ],
+      [
+        "angel_run_anim",
+        7
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "bomb",
+    "frame_count": 3,
+    "frame_index": [
+      [
+        "bomb",
+        8
+      ],
+      [
+        "bomb",
+        9
+      ],
+      [
+        "bomb",
+        10
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "button_blue_down.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "button_blue_down.png",
+        11
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "button_blue_up.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "button_blue_up.png",
+        12
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "button_red_down.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "button_red_down.png",
+        13
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "button_red_up.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "button_red_up.png",
+        14
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "chest_empty_open_anim",
+    "frame_count": 3,
+    "frame_index": [
+      [
+        "chest_empty_open_anim",
+        15
+      ],
+      [
+        "chest_empty_open_anim",
+        16
+      ],
+      [
+        "chest_empty_open_anim",
+        17
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "chest_full_open_anim",
+    "frame_count": 3,
+    "frame_index": [
+      [
+        "chest_full_open_anim",
+        18
+      ],
+      [
+        "chest_full_open_anim",
+        19
+      ],
+      [
+        "chest_full_open_anim",
+        20
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "chest_mimic_open_anim",
+    "frame_count": 3,
+    "frame_index": [
+      [
+        "chest_mimic_open_anim",
+        21
+      ],
+      [
+        "chest_mimic_open_anim",
+        22
+      ],
+      [
+        "chest_mimic_open_anim",
+        23
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "edge_down.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "edge_down.png",
+        24
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "flask_big_blue.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "flask_big_blue.png",
+        25
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "flask_big_green.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "flask_big_green.png",
+        26
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "flask_big_red.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "flask_big_red.png",
+        27
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "flask_big_yellow.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "flask_big_yellow.png",
+        28
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "flask_blue.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "flask_blue.png",
+        29
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "flask_green.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "flask_green.png",
+        30
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "flask_red.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "flask_red.png",
+        31
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "flask_yellow.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "flask_yellow.png",
+        32
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_1.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_1.png",
+        33
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_2.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_2.png",
+        34
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_3.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_3.png",
+        35
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_4.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_4.png",
+        36
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_5.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_5.png",
+        37
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_6.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_6.png",
+        38
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_7.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_7.png",
+        39
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_8.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_8.png",
+        40
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_ladder.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_ladder.png",
+        41
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_spikes_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "floor_spikes_anim",
+        42
+      ],
+      [
+        "floor_spikes_anim",
+        43
+      ],
+      [
+        "floor_spikes_anim",
+        44
+      ],
+      [
+        "floor_spikes_anim",
+        45
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "floor_stairs.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "floor_stairs.png",
+        46
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "goblin_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "goblin_idle_anim",
+        47
+      ],
+      [
+        "goblin_idle_anim",
+        48
+      ],
+      [
+        "goblin_idle_anim",
+        49
+      ],
+      [
+        "goblin_idle_anim",
+        50
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "goblin_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "goblin_run_anim",
+        51
+      ],
+      [
+        "goblin_run_anim",
+        52
+      ],
+      [
+        "goblin_run_anim",
+        53
+      ],
+      [
+        "goblin_run_anim",
+        54
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "hole.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "hole.png",
+        55
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "ice_zombie_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "ice_zombie_anim",
+        56
+      ],
+      [
+        "ice_zombie_anim",
+        57
+      ],
+      [
+        "ice_zombie_anim",
+        58
+      ],
+      [
+        "ice_zombie_anim",
+        59
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "imp_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "imp_idle_anim",
+        60
+      ],
+      [
+        "imp_idle_anim",
+        61
+      ],
+      [
+        "imp_idle_anim",
+        62
+      ],
+      [
+        "imp_idle_anim",
+        63
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "imp_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "imp_run_anim",
+        64
+      ],
+      [
+        "imp_run_anim",
+        65
+      ],
+      [
+        "imp_run_anim",
+        66
+      ],
+      [
+        "imp_run_anim",
+        67
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "lever_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "lever_left.png",
+        68
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "lever_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "lever_right.png",
+        69
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "muddy_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "muddy_anim",
+        70
+      ],
+      [
+        "muddy_anim",
+        71
+      ],
+      [
+        "muddy_anim",
+        72
+      ],
+      [
+        "muddy_anim",
+        73
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "skelet_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "skelet_idle_anim",
+        74
+      ],
+      [
+        "skelet_idle_anim",
+        75
+      ],
+      [
+        "skelet_idle_anim",
+        76
+      ],
+      [
+        "skelet_idle_anim",
+        77
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "skelet_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "skelet_run_anim",
+        78
+      ],
+      [
+        "skelet_run_anim",
+        79
+      ],
+      [
+        "skelet_run_anim",
+        80
+      ],
+      [
+        "skelet_run_anim",
+        81
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "skull.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "skull.png",
+        82
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "swampy_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "swampy_anim",
+        83
+      ],
+      [
+        "swampy_anim",
+        84
+      ],
+      [
+        "swampy_anim",
+        85
+      ],
+      [
+        "swampy_anim",
+        86
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "tiny_slug_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "tiny_slug_anim",
+        87
+      ],
+      [
+        "tiny_slug_anim",
+        88
+      ],
+      [
+        "tiny_slug_anim",
+        89
+      ],
+      [
+        "tiny_slug_anim",
+        90
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "tiny_zombie_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "tiny_zombie_idle_anim",
+        91
+      ],
+      [
+        "tiny_zombie_idle_anim",
+        92
+      ],
+      [
+        "tiny_zombie_idle_anim",
+        93
+      ],
+      [
+        "tiny_zombie_idle_anim",
+        94
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "tiny_zombie_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "tiny_zombie_run_anim",
+        95
+      ],
+      [
+        "tiny_zombie_run_anim",
+        96
+      ],
+      [
+        "tiny_zombie_run_anim",
+        97
+      ],
+      [
+        "tiny_zombie_run_anim",
+        98
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_banner_blue.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_banner_blue.png",
+        99
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_banner_green.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_banner_green.png",
+        100
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_banner_red.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_banner_red.png",
+        101
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_banner_yellow.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_banner_yellow.png",
+        102
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_bottom_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_bottom_left.png",
+        103
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_bottom_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_bottom_right.png",
+        104
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_left.png",
+        105
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_mid_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_mid_left.png",
+        106
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_mid_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_mid_right.png",
+        107
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_right.png",
+        108
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_top_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_top_left.png",
+        109
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_top_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_top_right.png",
+        110
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_tshape_bottom_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_tshape_bottom_left.png",
+        111
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_tshape_bottom_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_tshape_bottom_right.png",
+        112
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_tshape_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_tshape_left.png",
+        113
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_edge_tshape_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_edge_tshape_right.png",
+        114
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_fountain_basin_blue_anim",
+    "frame_count": 3,
+    "frame_index": [
+      [
+        "wall_fountain_basin_blue_anim",
+        115
+      ],
+      [
+        "wall_fountain_basin_blue_anim",
+        116
+      ],
+      [
+        "wall_fountain_basin_blue_anim",
+        117
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_fountain_basin_red_anim",
+    "frame_count": 3,
+    "frame_index": [
+      [
+        "wall_fountain_basin_red_anim",
+        118
+      ],
+      [
+        "wall_fountain_basin_red_anim",
+        119
+      ],
+      [
+        "wall_fountain_basin_red_anim",
+        120
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_fountain_mid_blue_anim",
+    "frame_count": 3,
+    "frame_index": [
+      [
+        "wall_fountain_mid_blue_anim",
+        121
+      ],
+      [
+        "wall_fountain_mid_blue_anim",
+        122
+      ],
+      [
+        "wall_fountain_mid_blue_anim",
+        123
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_fountain_mid_red_anim",
+    "frame_count": 3,
+    "frame_index": [
+      [
+        "wall_fountain_mid_red_anim",
+        124
+      ],
+      [
+        "wall_fountain_mid_red_anim",
+        125
+      ],
+      [
+        "wall_fountain_mid_red_anim",
+        126
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_fountain_top_1.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_fountain_top_1.png",
+        127
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_fountain_top_2.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_fountain_top_2.png",
+        128
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_fountain_top_3.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_fountain_top_3.png",
+        129
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_goo.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_goo.png",
+        130
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_goo_base.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_goo_base.png",
+        131
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_hole_1.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_hole_1.png",
+        132
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_hole_2.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_hole_2.png",
+        133
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_left.png",
+        134
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_mid.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_mid.png",
+        135
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_outer_front_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_outer_front_left.png",
+        136
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_outer_front_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_outer_front_right.png",
+        137
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_outer_mid_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_outer_mid_left.png",
+        138
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_outer_mid_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_outer_mid_right.png",
+        139
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_outer_top_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_outer_top_left.png",
+        140
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_outer_top_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_outer_top_right.png",
+        141
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_right.png",
+        142
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_top_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_top_left.png",
+        143
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_top_mid.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_top_mid.png",
+        144
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "wall_top_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wall_top_right.png",
+        145
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "name": "zombie_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "zombie_anim",
+        146
+      ],
+      [
+        "zombie_anim",
+        147
+      ],
+      [
+        "zombie_anim",
+        148
+      ],
+      [
+        "zombie_anim",
+        149
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x36.png",
+    "name": "big_demon_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "big_demon_idle_anim",
+        0
+      ],
+      [
+        "big_demon_idle_anim",
+        1
+      ],
+      [
+        "big_demon_idle_anim",
+        2
+      ],
+      [
+        "big_demon_idle_anim",
+        3
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x36.png",
+    "name": "big_demon_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "big_demon_run_anim",
+        4
+      ],
+      [
+        "big_demon_run_anim",
+        5
+      ],
+      [
+        "big_demon_run_anim",
+        6
+      ],
+      [
+        "big_demon_run_anim",
+        7
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x36.png",
+    "name": "big_zombie_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "big_zombie_idle_anim",
+        8
+      ],
+      [
+        "big_zombie_idle_anim",
+        9
+      ],
+      [
+        "big_zombie_idle_anim",
+        10
+      ],
+      [
+        "big_zombie_idle_anim",
+        11
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x36.png",
+    "name": "big_zombie_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "big_zombie_run_anim",
+        12
+      ],
+      [
+        "big_zombie_run_anim",
+        13
+      ],
+      [
+        "big_zombie_run_anim",
+        14
+      ],
+      [
+        "big_zombie_run_anim",
+        15
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x36.png",
+    "name": "ogre_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "ogre_idle_anim",
+        16
+      ],
+      [
+        "ogre_idle_anim",
+        17
+      ],
+      [
+        "ogre_idle_anim",
+        18
+      ],
+      [
+        "ogre_idle_anim",
+        19
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x36.png",
+    "name": "ogre_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "ogre_run_anim",
+        20
+      ],
+      [
+        "ogre_run_anim",
+        21
+      ],
+      [
+        "ogre_run_anim",
+        22
+      ],
+      [
+        "ogre_run_anim",
+        23
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "chort_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "chort_idle_anim",
+        0
+      ],
+      [
+        "chort_idle_anim",
+        1
+      ],
+      [
+        "chort_idle_anim",
+        2
+      ],
+      [
+        "chort_idle_anim",
+        3
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "chort_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "chort_run_anim",
+        4
+      ],
+      [
+        "chort_run_anim",
+        5
+      ],
+      [
+        "chort_run_anim",
+        6
+      ],
+      [
+        "chort_run_anim",
+        7
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "doc_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "doc_idle_anim",
+        8
+      ],
+      [
+        "doc_idle_anim",
+        9
+      ],
+      [
+        "doc_idle_anim",
+        10
+      ],
+      [
+        "doc_idle_anim",
+        11
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "doc_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "doc_run_anim",
+        12
+      ],
+      [
+        "doc_run_anim",
+        13
+      ],
+      [
+        "doc_run_anim",
+        14
+      ],
+      [
+        "doc_run_anim",
+        15
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "masked_orc_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "masked_orc_idle_anim",
+        16
+      ],
+      [
+        "masked_orc_idle_anim",
+        17
+      ],
+      [
+        "masked_orc_idle_anim",
+        18
+      ],
+      [
+        "masked_orc_idle_anim",
+        19
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "masked_orc_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "masked_orc_run_anim",
+        20
+      ],
+      [
+        "masked_orc_run_anim",
+        21
+      ],
+      [
+        "masked_orc_run_anim",
+        22
+      ],
+      [
+        "masked_orc_run_anim",
+        23
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "necromancer_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "necromancer_anim",
+        24
+      ],
+      [
+        "necromancer_anim",
+        25
+      ],
+      [
+        "necromancer_anim",
+        26
+      ],
+      [
+        "necromancer_anim",
+        27
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "orc_shaman_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "orc_shaman_idle_anim",
+        28
+      ],
+      [
+        "orc_shaman_idle_anim",
+        29
+      ],
+      [
+        "orc_shaman_idle_anim",
+        30
+      ],
+      [
+        "orc_shaman_idle_anim",
+        31
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "orc_shaman_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "orc_shaman_run_anim",
+        32
+      ],
+      [
+        "orc_shaman_run_anim",
+        33
+      ],
+      [
+        "orc_shaman_run_anim",
+        34
+      ],
+      [
+        "orc_shaman_run_anim",
+        35
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "orc_warrior_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "orc_warrior_idle_anim",
+        36
+      ],
+      [
+        "orc_warrior_idle_anim",
+        37
+      ],
+      [
+        "orc_warrior_idle_anim",
+        38
+      ],
+      [
+        "orc_warrior_idle_anim",
+        39
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "orc_warrior_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "orc_warrior_run_anim",
+        40
+      ],
+      [
+        "orc_warrior_run_anim",
+        41
+      ],
+      [
+        "orc_warrior_run_anim",
+        42
+      ],
+      [
+        "orc_warrior_run_anim",
+        43
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "pumpkin_dude_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "pumpkin_dude_idle_anim",
+        44
+      ],
+      [
+        "pumpkin_dude_idle_anim",
+        45
+      ],
+      [
+        "pumpkin_dude_idle_anim",
+        46
+      ],
+      [
+        "pumpkin_dude_idle_anim",
+        47
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "pumpkin_dude_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "pumpkin_dude_run_anim",
+        48
+      ],
+      [
+        "pumpkin_dude_run_anim",
+        49
+      ],
+      [
+        "pumpkin_dude_run_anim",
+        50
+      ],
+      [
+        "pumpkin_dude_run_anim",
+        51
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "slug_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "slug_anim",
+        52
+      ],
+      [
+        "slug_anim",
+        53
+      ],
+      [
+        "slug_anim",
+        54
+      ],
+      [
+        "slug_anim",
+        55
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "wogol_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "wogol_idle_anim",
+        56
+      ],
+      [
+        "wogol_idle_anim",
+        57
+      ],
+      [
+        "wogol_idle_anim",
+        58
+      ],
+      [
+        "wogol_idle_anim",
+        59
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "name": "wogol_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "wogol_run_anim",
+        60
+      ],
+      [
+        "wogol_run_anim",
+        61
+      ],
+      [
+        "wogol_run_anim",
+        62
+      ],
+      [
+        "wogol_run_anim",
+        63
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_6x7.png",
+    "name": "coin_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "coin_anim",
+        0
+      ],
+      [
+        "coin_anim",
+        1
+      ],
+      [
+        "coin_anim",
+        2
+      ],
+      [
+        "coin_anim",
+        3
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x48.png",
+    "name": "column.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "column.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x48.png",
+    "name": "column_wall.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "column_wall.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x24.png",
+    "name": "crate.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "crate.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x24.png",
+    "name": "weapon_double_axe.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_double_axe.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x32.png",
+    "name": "doors_frame_left.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "doors_frame_left.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x32.png",
+    "name": "doors_frame_right.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "doors_frame_right.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x16.png",
+    "name": "doors_frame_top.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "doors_frame_top.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x32.png",
+    "name": "doors_leaf_closed.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "doors_leaf_closed.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x32.png",
+    "name": "doors_leaf_open.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "doors_leaf_open.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "dwarf_f_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "dwarf_f_hit_anim",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "dwarf_f_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "dwarf_f_idle_anim",
+        1
+      ],
+      [
+        "dwarf_f_idle_anim",
+        2
+      ],
+      [
+        "dwarf_f_idle_anim",
+        3
+      ],
+      [
+        "dwarf_f_idle_anim",
+        4
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "dwarf_f_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "dwarf_f_run_anim",
+        5
+      ],
+      [
+        "dwarf_f_run_anim",
+        6
+      ],
+      [
+        "dwarf_f_run_anim",
+        7
+      ],
+      [
+        "dwarf_f_run_anim",
+        8
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "dwarf_m_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "dwarf_m_hit_anim",
+        9
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "dwarf_m_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "dwarf_m_idle_anim",
+        10
+      ],
+      [
+        "dwarf_m_idle_anim",
+        11
+      ],
+      [
+        "dwarf_m_idle_anim",
+        12
+      ],
+      [
+        "dwarf_m_idle_anim",
+        13
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "dwarf_m_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "dwarf_m_run_anim",
+        14
+      ],
+      [
+        "dwarf_m_run_anim",
+        15
+      ],
+      [
+        "dwarf_m_run_anim",
+        16
+      ],
+      [
+        "dwarf_m_run_anim",
+        17
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "elf_f_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "elf_f_hit_anim",
+        18
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "elf_f_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "elf_f_idle_anim",
+        19
+      ],
+      [
+        "elf_f_idle_anim",
+        20
+      ],
+      [
+        "elf_f_idle_anim",
+        21
+      ],
+      [
+        "elf_f_idle_anim",
+        22
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "elf_f_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "elf_f_run_anim",
+        23
+      ],
+      [
+        "elf_f_run_anim",
+        24
+      ],
+      [
+        "elf_f_run_anim",
+        25
+      ],
+      [
+        "elf_f_run_anim",
+        26
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "elf_m_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "elf_m_hit_anim",
+        27
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "elf_m_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "elf_m_idle_anim",
+        28
+      ],
+      [
+        "elf_m_idle_anim",
+        29
+      ],
+      [
+        "elf_m_idle_anim",
+        30
+      ],
+      [
+        "elf_m_idle_anim",
+        31
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "elf_m_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "elf_m_run_anim",
+        32
+      ],
+      [
+        "elf_m_run_anim",
+        33
+      ],
+      [
+        "elf_m_run_anim",
+        34
+      ],
+      [
+        "elf_m_run_anim",
+        35
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "knight_f_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "knight_f_hit_anim",
+        36
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "knight_f_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "knight_f_idle_anim",
+        37
+      ],
+      [
+        "knight_f_idle_anim",
+        38
+      ],
+      [
+        "knight_f_idle_anim",
+        39
+      ],
+      [
+        "knight_f_idle_anim",
+        40
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "knight_f_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "knight_f_run_anim",
+        41
+      ],
+      [
+        "knight_f_run_anim",
+        42
+      ],
+      [
+        "knight_f_run_anim",
+        43
+      ],
+      [
+        "knight_f_run_anim",
+        44
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "knight_m_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "knight_m_hit_anim",
+        45
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "knight_m_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "knight_m_idle_anim",
+        46
+      ],
+      [
+        "knight_m_idle_anim",
+        47
+      ],
+      [
+        "knight_m_idle_anim",
+        48
+      ],
+      [
+        "knight_m_idle_anim",
+        49
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "knight_m_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "knight_m_run_anim",
+        50
+      ],
+      [
+        "knight_m_run_anim",
+        51
+      ],
+      [
+        "knight_m_run_anim",
+        52
+      ],
+      [
+        "knight_m_run_anim",
+        53
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "lizard_f_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "lizard_f_hit_anim",
+        54
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "lizard_f_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "lizard_f_idle_anim",
+        55
+      ],
+      [
+        "lizard_f_idle_anim",
+        56
+      ],
+      [
+        "lizard_f_idle_anim",
+        57
+      ],
+      [
+        "lizard_f_idle_anim",
+        58
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "lizard_f_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "lizard_f_run_anim",
+        59
+      ],
+      [
+        "lizard_f_run_anim",
+        60
+      ],
+      [
+        "lizard_f_run_anim",
+        61
+      ],
+      [
+        "lizard_f_run_anim",
+        62
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "lizard_m_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "lizard_m_hit_anim",
+        63
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "lizard_m_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "lizard_m_idle_anim",
+        64
+      ],
+      [
+        "lizard_m_idle_anim",
+        65
+      ],
+      [
+        "lizard_m_idle_anim",
+        66
+      ],
+      [
+        "lizard_m_idle_anim",
+        67
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "lizard_m_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "lizard_m_run_anim",
+        68
+      ],
+      [
+        "lizard_m_run_anim",
+        69
+      ],
+      [
+        "lizard_m_run_anim",
+        70
+      ],
+      [
+        "lizard_m_run_anim",
+        71
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "wizzard_f_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wizzard_f_hit_anim",
+        72
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "wizzard_f_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "wizzard_f_idle_anim",
+        73
+      ],
+      [
+        "wizzard_f_idle_anim",
+        74
+      ],
+      [
+        "wizzard_f_idle_anim",
+        75
+      ],
+      [
+        "wizzard_f_idle_anim",
+        76
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "wizzard_f_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "wizzard_f_run_anim",
+        77
+      ],
+      [
+        "wizzard_f_run_anim",
+        78
+      ],
+      [
+        "wizzard_f_run_anim",
+        79
+      ],
+      [
+        "wizzard_f_run_anim",
+        80
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "wizzard_m_hit_anim",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "wizzard_m_hit_anim",
+        81
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "wizzard_m_idle_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "wizzard_m_idle_anim",
+        82
+      ],
+      [
+        "wizzard_m_idle_anim",
+        83
+      ],
+      [
+        "wizzard_m_idle_anim",
+        84
+      ],
+      [
+        "wizzard_m_idle_anim",
+        85
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "name": "wizzard_m_run_anim",
+    "frame_count": 4,
+    "frame_index": [
+      [
+        "wizzard_m_run_anim",
+        86
+      ],
+      [
+        "wizzard_m_run_anim",
+        87
+      ],
+      [
+        "wizzard_m_run_anim",
+        88
+      ],
+      [
+        "wizzard_m_run_anim",
+        89
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_13x12.png",
+    "name": "ui_heart_empty.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "ui_heart_empty.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_13x12.png",
+    "name": "ui_heart_full.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "ui_heart_full.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_13x12.png",
+    "name": "ui_heart_half.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "ui_heart_half.png",
+        2
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_12x30.png",
+    "name": "weapon_anime_sword.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_anime_sword.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_7x21.png",
+    "name": "weapon_arrow.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_arrow.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_9x21.png",
+    "name": "weapon_axe.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_axe.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x22.png",
+    "name": "weapon_baton_with_spikes.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_baton_with_spikes.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x22.png",
+    "name": "weapon_golden_sword.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_golden_sword.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x37.png",
+    "name": "weapon_big_hammer.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_big_hammer.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_14x26.png",
+    "name": "weapon_bow.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_bow.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_14x26.png",
+    "name": "weapon_bow_2.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_bow_2.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_9x19.png",
+    "name": "weapon_cleaver.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_cleaver.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_9x30.png",
+    "name": "weapon_duel_sword.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_duel_sword.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_8x30.png",
+    "name": "weapon_green_magic_staff.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_green_magic_staff.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_8x30.png",
+    "name": "weapon_red_magic_staff.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_red_magic_staff.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x24.png",
+    "name": "weapon_hammer.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_hammer.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x24.png",
+    "name": "weapon_mace.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_mace.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_6x29.png",
+    "name": "weapon_katana.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_katana.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_6x13.png",
+    "name": "weapon_knife.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_knife.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x29.png",
+    "name": "weapon_knight_sword.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_knight_sword.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x30.png",
+    "name": "weapon_lavish_sword.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_lavish_sword.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_5x22.png",
+    "name": "weapon_machete.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_machete.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x21.png",
+    "name": "weapon_red_gem_sword.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_red_gem_sword.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x21.png",
+    "name": "weapon_regular_sword.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_regular_sword.png",
+        1
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x21.png",
+    "name": "weapon_rusty_sword.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_rusty_sword.png",
+        2
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x25.png",
+    "name": "weapon_saw_sword.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_saw_sword.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_6x30.png",
+    "name": "weapon_spear.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_spear.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x14.png",
+    "name": "weapon_throwing_axe.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_throwing_axe.png",
+        0
+      ]
+    ]
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_12x23.png",
+    "name": "weapon_waraxe.png",
+    "frame_count": 1,
+    "frame_index": [
+      [
+        "weapon_waraxe.png",
+        0
+      ]
+    ]
+  }
+]

@@ -16,11 +16,11 @@ struct Bot;
 
 #[derive(Default, Resource)]
 struct PlayerSpriteAtlas {
-    handle: Handle<TextureAtlas>,
+    image: Handle<Image>,
+    layout: Handle<TextureAtlasLayout>,
 }
 
 #[derive(Debug, Resource)]
-
 struct BotId(u64);
 
 #[derive(Component, Clone)]
@@ -31,7 +31,6 @@ struct AnimationIndices {
 
 #[derive(Component, Deref, DerefMut)]
 struct AnimationTimer(Timer);
-
 
 fn main() {
     let mut app = App::new();
@@ -104,8 +103,13 @@ fn server_update_system(
 
                 let transform = Transform::from_xyz((fastrand::f32() - 0.5) * 40.0, (fastrand::f32() - 0.5) * 40.0, 0.0); 
                 let player_entity = commands.spawn(SpriteSheetBundle {
-                    texture_atlas: player_sprite.handle.clone(),
-                    sprite: TextureAtlasSprite::new(animation_indices.first),
+                    texture: player_sprite.image.clone(),
+                    atlas: TextureAtlas {
+                        layout: player_sprite.layout.clone(),
+                        index: animation_indices.first,
+                    },
+                    // texture_atlas: player_sprite.handle.clone(),
+                    // sprite: TextureAtlasSprite::new(animation_indices.first),
                     transform: Transform {
                         translation: Vec3::new(0.0, 0.0, 1.0),
                         rotation: Quat::default(),
@@ -184,7 +188,7 @@ fn apply_position_system(mut query: Query<(&PlayerPosition, &mut Transform)>) {
 }
 
 fn spawn_bot(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut lobby: ResMut<ServerLobby>,
     mut server: ResMut<RenetServer>,
     mut bot_id: ResMut<BotId>,

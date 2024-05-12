@@ -1,0 +1,250 @@
+[
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x16.png",
+    "x_dimension": 16,
+    "y_dimension": 16,
+    "rows": 15,
+    "columns": 10,
+    "sprite_count": 150
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x36.png",
+    "x_dimension": 32,
+    "y_dimension": 36,
+    "rows": 3,
+    "columns": 10,
+    "sprite_count": 24
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x23.png",
+    "x_dimension": 16,
+    "y_dimension": 23,
+    "rows": 7,
+    "columns": 10,
+    "sprite_count": 64
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_6x7.png",
+    "x_dimension": 6,
+    "y_dimension": 7,
+    "rows": 1,
+    "columns": 4,
+    "sprite_count": 4
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x48.png",
+    "x_dimension": 16,
+    "y_dimension": 48,
+    "rows": 1,
+    "columns": 2,
+    "sprite_count": 2
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x24.png",
+    "x_dimension": 16,
+    "y_dimension": 24,
+    "rows": 1,
+    "columns": 2,
+    "sprite_count": 2
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x32.png",
+    "x_dimension": 16,
+    "y_dimension": 32,
+    "rows": 1,
+    "columns": 2,
+    "sprite_count": 2
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x16.png",
+    "x_dimension": 32,
+    "y_dimension": 16,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_32x32.png",
+    "x_dimension": 32,
+    "y_dimension": 32,
+    "rows": 1,
+    "columns": 2,
+    "sprite_count": 2
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_16x28.png",
+    "x_dimension": 16,
+    "y_dimension": 28,
+    "rows": 9,
+    "columns": 10,
+    "sprite_count": 90
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_13x12.png",
+    "x_dimension": 13,
+    "y_dimension": 12,
+    "rows": 1,
+    "columns": 3,
+    "sprite_count": 3
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_12x30.png",
+    "x_dimension": 12,
+    "y_dimension": 30,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_7x21.png",
+    "x_dimension": 7,
+    "y_dimension": 21,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_9x21.png",
+    "x_dimension": 9,
+    "y_dimension": 21,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x22.png",
+    "x_dimension": 10,
+    "y_dimension": 22,
+    "rows": 1,
+    "columns": 2,
+    "sprite_count": 2
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x37.png",
+    "x_dimension": 10,
+    "y_dimension": 37,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_14x26.png",
+    "x_dimension": 14,
+    "y_dimension": 26,
+    "rows": 1,
+    "columns": 2,
+    "sprite_count": 2
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_9x19.png",
+    "x_dimension": 9,
+    "y_dimension": 19,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_9x30.png",
+    "x_dimension": 9,
+    "y_dimension": 30,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_8x30.png",
+    "x_dimension": 8,
+    "y_dimension": 30,
+    "rows": 1,
+    "columns": 2,
+    "sprite_count": 2
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x24.png",
+    "x_dimension": 10,
+    "y_dimension": 24,
+    "rows": 1,
+    "columns": 2,
+    "sprite_count": 2
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_6x29.png",
+    "x_dimension": 6,
+    "y_dimension": 29,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_6x13.png",
+    "x_dimension": 6,
+    "y_dimension": 13,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x29.png",
+    "x_dimension": 10,
+    "y_dimension": 29,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x30.png",
+    "x_dimension": 10,
+    "y_dimension": 30,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_5x22.png",
+    "x_dimension": 5,
+    "y_dimension": 22,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x21.png",
+    "x_dimension": 10,
+    "y_dimension": 21,
+    "rows": 1,
+    "columns": 3,
+    "sprite_count": 3
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x25.png",
+    "x_dimension": 10,
+    "y_dimension": 25,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_6x30.png",
+    "x_dimension": 6,
+    "y_dimension": 30,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_10x14.png",
+    "x_dimension": 10,
+    "y_dimension": 14,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  },
+  {
+    "file_name": "./spritesheets/spriteatlas/image_atlas_12x23.png",
+    "x_dimension": 12,
+    "y_dimension": 23,
+    "rows": 1,
+    "columns": 1,
+    "sprite_count": 1
+  }
+]

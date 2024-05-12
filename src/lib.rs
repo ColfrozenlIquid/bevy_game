@@ -3,6 +3,11 @@ pub mod tilemap;
 pub mod mainmenu;
 pub mod splashscreen;
 pub mod level;
+pub mod magic;
+pub mod input;
+pub mod cursor;
+pub mod melee;
+pub mod spritesheet;
 
 use std::time::Duration;
 
@@ -13,12 +18,22 @@ use serde::{Deserialize, Serialize};
 pub const PROTOCOL_ID: u64 = 7;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-pub enum GameState {
+pub enum AppState {
     #[default]
-    Splash,
-    Menu,
-    Game,
+    SplashScreen,
+    MainMenu,
+    LoadingScreen,
+    InGame,
+    PauseScreen,
+    AssetLoading,
 }
+
+#[derive(Resource, Default, Debug)]
+pub struct CursorWorldCoordinates(pub Vec3);
+
+#[derive(Component, Default)]
+pub struct PlayerCamera;
+
 
 #[derive(Debug, Component)]
 pub struct Player {

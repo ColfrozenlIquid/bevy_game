@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::GameState;
+use crate::AppState;
 
 pub fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
     for entity in &to_despawn {
@@ -8,13 +8,11 @@ pub fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut comm
 }
 
 pub mod menu {
-    use std::default;
-
     use bevy::{app::AppExit, prelude::*};
-    use super::{despawn_screen, GameState};
+    use super::{despawn_screen, AppState};
 
     const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
-    const MENU_MUSIC: &str = ".\\music\\menu_music.ogg";
+    // const MENU_MUSIC: &str = ".\\music\\menu_music.ogg";
     const CHARACTER_SPRITE_PATH: &str = ".\\sprites\\animated_characters_600.png";
     const UI_SPRITE_PATH: &str = ".\\sprites\\arrow_sprite_200.png";
 
@@ -23,12 +21,12 @@ pub mod menu {
     impl Plugin for MenuPlugin {
         fn build(&self, app: &mut App) {
             app
-                .add_state::<MenuState>()
+                .init_state::<MenuState>()
                 .insert_resource(CharacterSpriteAtlas::default())
                 .insert_resource(UISpriteAtlas::default())
                 .insert_resource(SelectedCharacter { current: 0, count: 3})
 
-                .add_systems(OnEnter(GameState::Menu), menu_setup)
+                .add_systems(OnEnter(AppState::MainMenu), menu_setup)
                 .add_systems(OnEnter(MenuState::Main), main_menu_setup)
                 .add_systems(OnExit(MenuState::Main), despawn_screen::<MainMenuScreen>)
 
@@ -38,8 +36,7 @@ pub mod menu {
                 .add_systems(OnEnter(MenuState::Continue), continue_menu_setup)
                 .add_systems(OnExit(MenuState::Continue), despawn_screen::<ContinueMenuScreen>)
 
-                .add_systems(Update, (menu_action, character_selector_menu, button_system, animate_sprite).run_if(in_state(GameState::Menu)));
-
+                .add_systems(Update, (menu_action, character_selector_menu, button_system, animate_sprite).run_if(in_state(AppState::MainMenu)));
         }
     }
 
@@ -91,12 +88,14 @@ pub mod menu {
 
     #[derive(Default, Resource)]
     struct CharacterSpriteAtlas {
-        handle: Handle<TextureAtlas>,
+        image: Handle<Image>,
+        layout: Handle<TextureAtlasLayout>
     }
 
     #[derive(Default, Resource)]
     struct UISpriteAtlas {
-        handle: Handle<TextureAtlas>,
+        image: Handle<Image>,
+        layout: Handle<TextureAtlasLayout>
     }
 
     #[derive(Default, Resource)]
@@ -105,17 +104,17 @@ pub mod menu {
         count: usize,
     }
 
-    fn menu_music_setup(
-        asset_server: Res<AssetServer>,
-        mut commands: Commands
-    ) {
-        commands.spawn(
-            AudioBundle {
-                source: asset_server.load(MENU_MUSIC),
-                ..Default::default()
-            }
-        );
-    }
+    // fn menu_music_setup(
+    //     asset_server: Res<AssetServer>,
+    //     mut commands: Commands
+    // ) {
+    //     commands.spawn(
+    //         AudioBundle {
+    //             source: asset_server.load(MENU_MUSIC),
+    //             ..Default::default()
+    //         }
+    //     );
+    // }
 
     fn menu_setup(
         mut menu_state: ResMut<NextState<MenuState>>,
@@ -123,31 +122,33 @@ pub mod menu {
         assets_server: Res<AssetServer>,
         mut character_sprites: ResMut<CharacterSpriteAtlas>,
         mut ui_sprites: ResMut<UISpriteAtlas>,
-        mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+        mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
     ) {
         menu_state.set(MenuState::Main);
         let ui_font_handle: Handle<Font> = assets_server.load(FONT_PATH);
         commands.insert_resource(UiFont(ui_font_handle));
 
         {
-            let texture_handle = assets_server.load(CHARACTER_SPRITE_PATH);
-            let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(96.0, 96.0), 4, 3, None, None);
-            let texture_atlas_handle = texture_atlases.add(texture_atlas);
-            character_sprites.handle = texture_atlas_handle.clone();
+            let texture = assets_server.load(CHARACTER_SPRITE_PATH);
+            let layout = TextureAtlasLayout::from_grid( Vec2::new(96.0, 96.0), 4, 3, None, None);
+            let texture_atlas_layout_handle = texture_atlases.add(layout);
+            character_sprites.image = texture;
+            character_sprites.layout = texture_atlas_layout_handle;
         }
 
         {
-            let texture_handle = assets_server.load(UI_SPRITE_PATH);
-            let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 1, 1, None, None);
-            let texture_atlas_handle = texture_atlases.add(texture_atlas);
-            ui_sprites.handle = texture_atlas_handle.clone();
+            let texture = assets_server.load(UI_SPRITE_PATH);
+            let layout = TextureAtlasLayout::from_grid(Vec2::new(32.0, 32.0), 1, 1, None, None);
+            let texture_atlas_layout_handle = texture_atlases.add(layout);
+            ui_sprites.image = texture;
+            ui_sprites.layout = texture_atlas_layout_handle;
         }
     }
 
     fn animate_sprite(
         time: Res<Time>,
-        mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut UiTextureAtlasImage)>,
-        selected_character: ResMut<SelectedCharacter>
+        mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
+        // selected_character: ResMut<SelectedCharacter>
     ) {
         for (indices, mut timer, mut sprite) in &mut query {
             timer.tick(time.delta());
@@ -162,8 +163,8 @@ pub mod menu {
     }
 
     fn button_system(
-        mut interaction_query: Query<(&Interaction, &mut Children), (Changed<Interaction>, With<Button>)>,
-        mut text_query: Query<(&mut Text, With<ButtonText>)>
+        // mut interaction_query: Query<(&Interaction, &mut Children), (Changed<Interaction>, With<Button>)>,
+        // mut text_query: Query<(&mut Text, With<ButtonText>)>
     ) {
         // for (interaction, children) in &mut interaction_query {
         //     for &child in children.iter() {
@@ -253,7 +254,7 @@ pub mod menu {
                         },
                         ..Default::default()
                     },
-                    MenuButtonAction::Settings
+                    MenuButtonAction::Continue
                 ))
                 .with_children(|parent| {
                     parent.spawn(
@@ -300,11 +301,14 @@ pub mod menu {
         });
     }
 
-    fn settings_menu_setup() {
-
+    fn continue_menu_setup(
+        mut app_state: ResMut<NextState<AppState>>,
+    ) {
+        app_state.set(AppState::LoadingScreen);
+        println!("Setting state to loading screen");
     }
 
-    fn continue_menu_setup(
+    fn settings_menu_setup(
         mut commands: Commands,
         ui_font: Res<UiFont>,
         character_sprites: ResMut<CharacterSpriteAtlas>,
@@ -373,24 +377,34 @@ pub mod menu {
                         CharacterSelectorButton::Previous,
                     )).with_children(|parent| {
                         parent.spawn(
-                            AtlasImageBundle {
-                                texture_atlas: ui_sprites.handle.clone(),
-                                texture_atlas_image: UiTextureAtlasImage {
-                                    index: 0,
-                                    ..Default::default()
+                            SpriteSheetBundle {
+                                texture: ui_sprites.image.clone(),
+                                atlas: TextureAtlas{
+                                    layout: ui_sprites.layout.clone(),
+                                    index: animation_indices.first,
                                 },
+                                // texture_atlas: ui_sprites.handle.clone(),
+                                // texture_atlas_image: UiTextureAtlasImage {
+                                //     index: 0,
+                                //     ..Default::default()
+                                // },
                                 ..Default::default()
                             }
                         );
                     });
 
                     parent.spawn((
-                        AtlasImageBundle {
-                            texture_atlas: character_sprites.handle.clone(),
-                            texture_atlas_image: UiTextureAtlasImage {
+                        SpriteSheetBundle {
+                            texture: character_sprites.image.clone(),
+                            atlas: TextureAtlas {
+                                layout: character_sprites.layout.clone(),
                                 index: animation_indices.first,
-                                ..Default::default()
                             },
+                            // texture_atlas: character_sprites.handle.clone(),
+                            // texture_atlas_image: UiTextureAtlasImage {
+                            //     index: animation_indices.first,
+                            //     ..Default::default()
+                            // },
                             ..Default::default()
                         },
                         animation_indices.clone(),
@@ -410,13 +424,18 @@ pub mod menu {
                         CharacterSelectorButton::Next,
                     )).with_children(|parent| {
                         parent.spawn(
-                            AtlasImageBundle {
-                                texture_atlas: ui_sprites.handle.clone(),
-                                texture_atlas_image: UiTextureAtlasImage {
-                                    index: 0,
-                                    flip_x: true,
-                                    ..Default::default()
+                            SpriteSheetBundle {
+                                texture: ui_sprites.image.clone(),
+                                atlas: TextureAtlas {
+                                    layout: ui_sprites.layout.clone(),
+                                    index: animation_indices.first,
                                 },
+                                // texture_atlas: ui_sprites.handle.clone(),
+                                // texture_atlas_image: UiTextureAtlasImage {
+                                //     index: 0,
+                                //     flip_x: true,
+                                //     ..Default::default()
+                                // },
                                 ..Default::default()
                             }
                         );
@@ -440,11 +459,11 @@ pub mod menu {
                     },
                     MenuButtonAction::Settings => {
                         println!("Setting state to Settings");
-                        menu_state.set(MenuState::Settings)
+                        menu_state.set(MenuState::Settings);
                     },
                     MenuButtonAction::Exit => {
                         println!("Setting state to Exit");
-                        app_exit_events.send(AppExit)
+                        app_exit_events.send(AppExit);
                     },
                 }
             }

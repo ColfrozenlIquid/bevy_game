@@ -1,162 +1,95 @@
-use std::{f32::consts::PI, net::UdpSocket, time::{Duration, SystemTime, UNIX_EPOCH}};
-use bevy::{input::mouse::MouseButtonInput, prelude::*, sprite::{collide_aabb::collide, MaterialMesh2dBundle, Mesh2dHandle}, transform::commands, utils::HashMap, window::PrimaryWindow};
+use bevy_game_client::{cursor::CursorPlugin, input::InputPlugin, mainmenu::menu::MenuPlugin, splashscreen::splash::SplashPlugin, CursorWorldCoordinates, PlayerCamera};
+use std::{borrow::BorrowMut, f32::consts::PI, net::UdpSocket, time::{Duration, SystemTime, UNIX_EPOCH}};
+use bevy::{asset::LoadedFolder, prelude::*, transform::commands, utils::HashMap};
 use bevy_egui::egui::epaint::text::cursor;
-use bevy_game_client::{connection_config, debug, mainmenu::{self}, splashscreen, tilemap, ClientChannel, GameState, NetworkedEntities, Player, PlayerInput, PlayerPosition, ServerChannel, ServerMessages, PROTOCOL_ID};
+use bevy_game_client::{connection_config, debug, magic::MagicPlugin, mainmenu, splashscreen, tilemap, ClientChannel, AppState, NetworkedEntities, Player, PlayerInput, PlayerPosition, ServerChannel, ServerMessages, PROTOCOL_ID};
+// use bevy_asset_loader::prelude::*;
 
 use bevy_renet::{client_connected, renet::{transport::{ClientAuthentication, NetcodeClientTransport, NetcodeTransportError}, ClientId, RenetClient}, transport::NetcodeClientPlugin, RenetClientPlugin};
-use bevy_ecs_ldtk::prelude::*;
 
 use debug::DebugPlugin;
-use tilemap::{TileMapPlugin, TileCollider};
 
 const SWORD_SPRITE_PATH: &str = ".\\sprites\\sword_anim.png";
 const PLAYER_SPRITE_PATH: &str = ".\\sprites\\vampire_v1_1_animated.png";
 const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
 const PLAYER_SPEED: f32 = 500.0;
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
-const GAME_CURSOR_SPRITE_PATH: &str = ".\\sprites\\cursor\\cursor_hand_200.png";
-const LEVEL_0_PATH: &str = ".\\level\\level_0.ldtk";
 const SWORD_EQUIPED_SPRITE_PATH: &str = ".\\sprites\\sword.png";
-const FIRE_BALL_SPRITE_PATH: &str = ".\\sprites\\magic\\FireBall_64x64.png";
-const ICE_SPIKE_SPRITE_PATH: &str = ".\\sprites\\magic\\IcePick_64x64.png";
-const FIRE_BURST_SPRITE_PATH: &str = ".\\sprites\\magic\\FireBurst_64x64.png";
-const ICE_SPIKE_SHATTER_SPRITE_PATH: &str = ".\\sprites\\magic\\IceShatter_96x96.png";
 
 const SCALE: f32 = 5.0;
 
-#[derive(Component, Default)]
-struct PlayerCamera;
-
 #[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
-struct Volume(u32);
+pub struct Volume(u32);
 
 #[derive(Component)]
-struct ControllablePlayer;
+pub struct ControllablePlayer;
 
 #[derive(Component)]
-struct AnimateTranslation;
+pub struct AnimateTranslation;
 
 #[derive(Component)]
-struct PlayerLabel;
+pub struct PlayerLabel;
 
 #[derive(Default, Resource)]
-struct PlayerSpriteAtlas {
-    handle: Handle<TextureAtlas>,
+pub struct PlayerSpriteAtlas {
+    image: Handle<Image>,
+    layout: Handle<TextureAtlasLayout>,
 }
 
 #[derive(Default, Resource)]
-struct SwordSpriteAtlas {
-    handle: Handle<TextureAtlas>
+pub struct SwordSpriteAtlas {
+    image: Handle<Image>,
+    layout: Handle<TextureAtlasLayout>,
 }
 
 #[derive(Default, Resource)]
-struct FireBallSpriteAtlas {
-    handle: Handle<TextureAtlas>
-}
-
-#[derive(Default, Resource)]
-struct IceSpikeSpriteAtlas {
-    handle: Handle<TextureAtlas>
-}
-
-#[derive(Default, Resource)]
-struct EquipmentSpriteAtlas {
-    handle: Handle<TextureAtlas>
-}
-
-#[derive(Default, Resource)]
-struct FireBurstSpriteAtlas {
-    handle: Handle<TextureAtlas>
-}
-
-#[derive(Default, Resource)]
-struct IceSpikeShatterSpriteAtlas {
-    handle: Handle<TextureAtlas>
+pub struct EquipmentSpriteAtlas {
+    image: Handle<Image>,
+    layout: Handle<TextureAtlasLayout>,
 }
 
 #[derive(Debug)]
-struct PlayerInfo {
+pub struct PlayerInfo {
     client_entity: Entity,
     server_entity: Entity,
 }
 
 #[derive(Default, Resource)]
-struct NetworkMapping(HashMap<Entity, Entity>);
+pub struct NetworkMapping(HashMap<Entity, Entity>);
 
 #[derive(Debug, Default, Resource)]
-struct ClientLobby {
+pub struct ClientLobby {
     players: HashMap<ClientId, PlayerInfo>
 }
 
 #[derive(Debug, Resource)]
-struct CurrentClientId(u64);
+pub struct CurrentClientId(u64);
 
 #[derive(Component)]
-struct Sword {
+pub struct Sword {
     curent_index: usize,
 }
 
 #[derive(Component)]
-struct Equipment;
-
-#[derive(Component)]
-struct SpellFlightTime {
-    timer: Timer,
-}
-
-#[derive(Resource, Default)]
-struct SpellCoolDown{
-    timer: Timer,
-}
+pub struct Equipment;
 
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct Connected;
+pub struct Connected;
 
 #[derive(Component, Clone)]
-struct AnimationIndices {
+pub struct AnimationIndices {
     first: usize,
     last: usize
 }
 
 #[derive(Component, Deref, DerefMut)]
-struct AnimationTimer(Timer);
-
-#[derive(Component)]
-struct GameCursor;
-
-#[derive(Resource, Default, Debug)]
-struct CursorWorldCoordinates(Vec3);
-
-#[derive(Component)]
-struct CastSpell {
-    spell_type: Spells,
-    start_pos: Vec3,
-    direction: Vec2,
-    velocity: f32,
-    collision_offset: f32,
-}
+pub struct AnimationTimer(Timer);
 
 #[derive(Resource, Default)]
-struct SelectedSpell {
-    spell: Spells,
-}
+struct SpriteFolder(Handle<LoadedFolder>);
 
-#[derive(Default, PartialEq, Debug)]
-enum Spells {
-    #[default]
-    FireBall,
-    IceSpike,
-}
-
-#[derive(Component)]
-struct FireBall {
-    last_index: u32,
-}
-
-#[derive(Component)]
-struct IceSpike {
-    last_index: u32,
-}
+#[derive(Resource, Debug, Default)]
+struct CurrentState(AppState);
 
 fn main() {
     let mut app = App::new();
@@ -164,11 +97,20 @@ fn main() {
     app.add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(RenetClientPlugin)
         //.add_plugins(TileMapPlugin)
+        // .add_plugins(SpriteSheetPlugin)
         .add_plugins(DebugPlugin)
-        .add_plugins(mainmenu::menu::MenuPlugin)
-        .add_plugins(splashscreen::splash::SplashPlugin)
-        .add_plugins(LdtkPlugin)
-        .add_state::<GameState>();
+        .add_plugins(MagicPlugin)
+        .add_plugins(MenuPlugin)
+        .add_plugins(SplashPlugin)
+        // .add_plugins(LdtkPlugin)
+        .add_plugins(CursorPlugin)
+        .add_plugins(InputPlugin)
+        .init_state::<AppState>();
+
+    // app.init_loading_state(
+    //     LoadingState::new(AppState::AssetLoading)
+    // );
+    // LoadingState::new(AppState::AssetLoading);
 
     initialise_renet_transport_client(&mut app);
 
@@ -179,142 +121,129 @@ fn main() {
         .insert_resource(PlayerSpriteAtlas::default())
         .insert_resource(SwordSpriteAtlas::default())
         .insert_resource(EquipmentSpriteAtlas::default())
-        .insert_resource(CursorWorldCoordinates::default())
-        .insert_resource(FireBallSpriteAtlas::default())
-        .insert_resource(IceSpikeSpriteAtlas::default())
-        .insert_resource(LevelSelection::index(0))
-        .insert_resource(FireBurstSpriteAtlas::default())
-        .insert_resource(SpellCoolDown::default())
-        .insert_resource(IceSpikeShatterSpriteAtlas::default())
-        .insert_resource(SelectedSpell::default());
+        .insert_resource(CurrentState::default());
+        // .insert_resource(CursorWorldCoordinates::default())
+        // .insert_resource(LevelSelection::index(0));
 
-    app.add_systems(Startup, (setup, setup_game_cursor));
-    app.add_systems(Startup, get_window);
+    app.add_systems(Startup, setup_camera);
+
+    app.add_systems(OnEnter(AppState::InGame), (setup, get_window));
     app.add_systems(Update, (
-        move_cursor,
-        keyboard_input_system,
-        mouse_button_input_system,
-        despawn_sword_animation,
         (client_send_input, client_sync_players, client_send_position).in_set(Connected),
         animate_sprite,
         move_player,
+        debug_current_state,
         label_movement,
         camera_follow_player,
-        sword_follow_cursor,
-        cursor_system,
-        despawn_spells,
-        spell_flight_system,
-        select_spell_system,
-        enable_spell_cooldown,
-        show_spell_cooldown_timer,
-        despawn_fireball_spell_collision,
-        despawn_icespike_spell_collision,
-    ));
+    ).run_if(in_state(AppState::InGame)));
 
     app.run();
 }
 
-fn setup_game_cursor(
-    mut windows: Query<&mut Window>,
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
-    let mut window: Mut<Window> = windows.single_mut();
-    window.cursor.visible = false;
-
-    commands.spawn(
-        (ImageBundle {
-            image: asset_server.load(GAME_CURSOR_SPRITE_PATH).into(),
-            style: Style {
-                position_type: PositionType::Absolute,
-                ..Default::default()
-            },
-            z_index: ZIndex::Global(15),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..Default::default()
-        },
-        GameCursor
-    ));
-    println!("Spawned cursor sprite");
+fn debug_current_state(
+    state: Res<State<AppState>>,
+    mut current_state: ResMut<CurrentState>,
+    keyboard_input: Res<ButtonInput<KeyCode>>, 
+){
+    // if keyboard_input.pressed(KeyCode::KeyI) {
+    //     println!("Pressed I");
+    //     eprintln!("Current State: {:?}", state.get());
+    // }
+    // if *state.get() != current_state.0 {
+        eprintln!("Current State: {:?}", state.get());
+        // current_state.0 = *state.get();
+    // }
 }
+
+// fn spawn_character(
+//     mut commands: Commands,
+//     texture_atlas: Res<TextureAtlases>,
+//     sprite_collection: Res<SpriteCollection>,
+// ) {
+//     println!("Gets here client");
+//     let json_sprite = get_JSONSprite_by_type(ANGEL_IDLE, &sprite_collection);
+//     // println!("Found JSONsprite: {:?}", json_sprite);
+//     // let handle_vector = &texture_atlas.handles;
+//     // for handle in handle_vector.iter() {
+//     //     if handle.1.file_name == DWARF_F_IDLE {
+//     //         commands.spawn(
+//     //     (SpriteSheetBundle {
+//     //                 texture_atlas: handle.0.clone(),
+//     //                 sprite: TextureAtlasSprite::new(handle.1.),
+//     //                 transform: Transform {
+//     //                     translation: Vec3 { x: 0.0, y: 0.0, z: 5.0 },
+//     //                     rotation: Quat::default(),
+//     //                     scale: Vec3 { x: 1.5, y: 1.5, z: 1.0 }
+//     //                 },
+//     //                 ..Default::default()
+//     //             },
+//     //             Equipment,
+//     //         ));
+//     //     }
+//     // }
+// }
 
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     mut player_sprite: ResMut<PlayerSpriteAtlas>,
     mut sword_sprite: ResMut<SwordSpriteAtlas>,
     mut equipment_sprite: ResMut<EquipmentSpriteAtlas>,
-    mut fireball_sprite: ResMut<FireBallSpriteAtlas>,
-    mut icespike_sprite: ResMut<IceSpikeSpriteAtlas>,
-    mut fireburst_sprite: ResMut<FireBurstSpriteAtlas>,
-    mut icespikeshatter_sprite: ResMut<IceSpikeShatterSpriteAtlas>,
     client_id : ResMut<CurrentClientId>,
 ) {
+    let animation_indices = AnimationIndices {first: 0, last: 3};
 
-    commands.spawn(LdtkWorldBundle {
-        ldtk_handle: asset_server.load(LEVEL_0_PATH),
-        transform: Transform {
-            translation: Vec3::new(-1000.0, -1200.0, -1.0),
-            scale: Vec3::new(SCALE, SCALE, 1.0),
-            ..Default::default()
-        },
-        ..Default::default()
-    });
+    println!("Setting up client");
 
     {
-        let texture_handle = asset_server.load(PLAYER_SPRITE_PATH);
-        let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(16.0, 16.0), 4, 1, None, None);
-        let texture_atlas_handle = texture_atlases.add(texture_atlas);
-        player_sprite.handle = texture_atlas_handle.clone();
+        let texture = asset_server.load(PLAYER_SPRITE_PATH);
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(16.0, 16.0), 4, 1, None, None);
+        let texture_atlas_layout_handle = texture_atlas_layouts.add(layout);
+        player_sprite.image = texture;
+        player_sprite.layout = texture_atlas_layout_handle;
     }
 
-    {
-        let texture_handle = asset_server.load(SWORD_SPRITE_PATH);
-        let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64.0, 64.0), 5, 1, None, None);
-        let texture_atlas_handle = texture_atlases.add(texture_atlas);
-        sword_sprite.handle = texture_atlas_handle.clone();
-    }
+    // commands.spawn(
+    //     (SpriteSheetBundle {
+    //         texture: player_sprite.image.clone(),
+    //         atlas: TextureAtlas {
+    //             layout: player_sprite.layout.clone(),
+    //             index: animation_indices.first,
+    //         },
+    //         transform: Transform {
+    //             translation: Vec3 { x: 0.0, y: 0.0, z: 12.0 },
+    //             rotation: Quat::default(),
+    //             scale: Vec3 { x: 1.5, y: 1.5, z: 1.0 }
+    //         },
+    //         ..Default::default()
+    //     },
+    //     // Equipment,
+    // ));
 
-    {
-        let texture_handle = asset_server.load(SWORD_EQUIPED_SPRITE_PATH);
-        let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64.0, 64.0), 1, 1, None, None);
-        let texture_atlas_handle = texture_atlases.add(texture_atlas);
-        equipment_sprite.handle = texture_atlas_handle.clone();
-    }
+    // commands.spawn(LdtkWorldBundle {
+    //     ldtk_handle: asset_server.load(LEVEL_0_PATH),
+    //     transform: Transform {
+    //         translation: Vec3::new(-1000.0, -1200.0, -1.0),
+    //         scale: Vec3::new(SCALE, SCALE, 1.0),
+    //         ..Default::default()
+    //     },
+    //     ..Default::default()
+    // });
 
-    {
-        let texture_handle = asset_server.load(FIRE_BALL_SPRITE_PATH);
-        let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64.0, 64.0), 45, 1, None, None);
-        let texture_atlas_handle = texture_atlases.add(texture_atlas);
-        fireball_sprite.handle = texture_atlas_handle.clone();
-    }
+    // {
+    //     let texture_handle = asset_server.load(SWORD_SPRITE_PATH);
+    //     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64.0, 64.0), 5, 1, None, None);
+    //     let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    //     sword_sprite.handle = texture_atlas_handle.clone();
+    // }
 
-    {
-        let texture_handle = asset_server.load(ICE_SPIKE_SPRITE_PATH);
-        let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64.0, 64.0), 30, 1, None, None);
-        let texture_atlas_handle = texture_atlases.add(texture_atlas);
-        icespike_sprite.handle = texture_atlas_handle.clone();
-    }
-
-    {
-        let texture_handle = asset_server.load(FIRE_BURST_SPRITE_PATH);
-        let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64.0, 64.0), 29, 1, None, None);
-        let texture_atlas_handle = texture_atlases.add(texture_atlas);
-        fireburst_sprite.handle = texture_atlas_handle.clone();
-    }
-
-    {
-        let texture_handle = asset_server.load(ICE_SPIKE_SHATTER_SPRITE_PATH);
-        let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(96.0, 96.0), 49, 1, None, None);
-        let texture_atlas_handle = texture_atlases.add(texture_atlas);
-        icespikeshatter_sprite.handle = texture_atlas_handle.clone();
-    }
-    
-    commands.spawn((
-        Camera2dBundle::default(), 
-        PlayerCamera
-    ));
+    // {
+    //     let texture_handle = asset_server.load(SWORD_EQUIPED_SPRITE_PATH);
+    //     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64.0, 64.0), 1, 1, None, None);
+    //     let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    //     equipment_sprite.handle = texture_atlas_handle.clone();
+    // }
 
     // commands.spawn(
     //     (SpriteSheetBundle {
@@ -338,170 +267,20 @@ fn setup(
                 font_size : 20.0,
                 ..default()
             },
-            ).with_alignment(TextAlignment::Center),
+            ),
             ..Default::default()
         },
             PlayerLabel,
         ));
 }
 
-fn cursor_system(
-    mut cursor_coords: ResMut<CursorWorldCoordinates>,
-    query_window: Query<&Window, With<PrimaryWindow>>,
-    query_camera: Query<(&Camera, &GlobalTransform), With<PlayerCamera>>,
+fn setup_camera(
+    mut commands: Commands,
 ){
-    let (camera, camera_transform) = query_camera.single();
-    let window = query_window.single();
-
-    if let Some(world_position) = window.cursor_position()
-        .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
-        .map(|ray| ray.origin) {
-            cursor_coords.0 = world_position;
-        }
-}
-
-fn select_spell_system(
-    mut selected_spell: ResMut<SelectedSpell>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
-    if keyboard_input.pressed(KeyCode::Key1) && selected_spell.spell != Spells::FireBall {
-        println!("Switched to Fire Ball");
-        selected_spell.spell = Spells::FireBall;
-    }
-    if keyboard_input.pressed(KeyCode::Key2) && selected_spell.spell != Spells::IceSpike {
-        println!("Switched to Ice Spike");
-        selected_spell.spell = Spells::IceSpike;
-    }
-}
-
-fn despawn_spells(
-    mut commands: Commands,
-    mut timer_query: Query<(Entity, &Transform, &mut SpellFlightTime, &CastSpell)>,
-    fireburst_sprite: Res<FireBurstSpriteAtlas>,
-    icespikeshatter_sprite: Res<IceSpikeShatterSpriteAtlas>,
-    time: Res<Time>,
-) {
-    for (entity, &transform, mut spell_timer, cast_spell) in timer_query.iter_mut() {
-        spell_timer.timer.tick(time.delta());
-
-        if spell_timer.timer.finished() {
-            let impact_position = transform.translation + (cast_spell.direction * SCALE/2.0 * cast_spell.collision_offset).extend(1.0);
-            println!("Cast spell type attribute: {:?}", cast_spell.spell_type);
-            if cast_spell.spell_type == Spells::FireBall {
-                println!("despawn spell fireball");
-                spawn_fireball_spell_collision(&mut commands, &fireburst_sprite, &transform, &impact_position);
-                commands.entity(entity).despawn();
-            }
-            else if cast_spell.spell_type == Spells::IceSpike {
-                println!("despawn spell icespike");
-                spawn_icespike_spell_collision(&mut commands, &icespikeshatter_sprite, &transform, &impact_position);
-                commands.entity(entity).despawn();
-            }
-        }
-    }
-}
-
-fn spawn_fireball_spell_collision(
-    commands: &mut Commands,
-    fireburst_sprite: &Res<FireBurstSpriteAtlas>,
-    spell_transform: &Transform,
-    spell_impact_position: &Vec3,
-) {
-    let animation_indices = AnimationIndices { first: 0, last: 28};
-    let rotation_quat = Quat::from_rotation_z(PI/2.0);
-    let sprite_quat = spell_transform.rotation * rotation_quat;
-
     commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: fireburst_sprite.handle.clone(),
-            sprite: TextureAtlasSprite::new(animation_indices.first),
-            transform: Transform {
-                translation: Vec3::new(spell_impact_position.x, spell_impact_position.y, 1.0),
-                scale: Vec3::new(-SCALE/2.0, SCALE/2.0, 1.0),
-                rotation: sprite_quat,
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-        FireBall { last_index: 28 },
-        animation_indices.clone(),
-        AnimationTimer(Timer::from_seconds(0.02, TimerMode::Repeating)),
+        Camera2dBundle::default(), 
+        PlayerCamera
     ));
-}
-
-fn spawn_icespike_spell_collision(
-    commands: &mut Commands,
-    fireburst_sprite: &Res<IceSpikeShatterSpriteAtlas>,
-    spell_transform: &Transform,
-    spell_impact_position: &Vec3,
-) {
-    let animation_indices = AnimationIndices { first: 0, last: 48};
-    let rotation_quat = Quat::from_rotation_z(PI/2.0);
-    let sprite_quat = spell_transform.rotation * rotation_quat;
-
-    commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: fireburst_sprite.handle.clone(),
-            sprite: TextureAtlasSprite::new(animation_indices.first),
-            transform: Transform {
-                translation: Vec3::new(spell_impact_position.x, spell_impact_position.y, 1.0),
-                scale: Vec3::new(-SCALE/2.0, SCALE/2.0, 1.0),
-                rotation: sprite_quat,
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-        IceSpike { last_index: 48 },
-        animation_indices.clone(),
-        AnimationTimer(Timer::from_seconds(0.02, TimerMode::Repeating)),
-    ));
-}
-
-fn despawn_fireball_spell_collision(
-    mut commands: Commands,
-    entity_query: Query<(Entity, &TextureAtlasSprite), With<FireBall>>
-) {
-    for (entity, sprite) in entity_query.iter() {
-        if sprite.index == 28 {
-            commands.entity(entity).despawn();
-        }
-    }
-}
-
-fn despawn_icespike_spell_collision(
-    mut commands: Commands,
-    entity_query: Query<(Entity, &TextureAtlasSprite), With<IceSpike>>
-) {
-    for (entity, sprite) in entity_query.iter() {
-        if sprite.index == 48 {
-            commands.entity(entity).despawn();
-        }
-    }
-}
-
-fn enable_spell_cooldown(
-    mut spell_cooldown: ResMut<SpellCoolDown>,
-    time: Res<Time>,
-) {
-    spell_cooldown.timer.tick(time.delta());
-}
-
-fn show_spell_cooldown_timer(
-    spell_cooldown: Res<SpellCoolDown>
-) {
-    // println!("{:?}", spell_cooldown.timer);
-}
-
-fn move_cursor(
-    window: Query<&Window>,
-    mut cursor: Query<&mut Style, With<GameCursor>>
-) {
-    let window: &Window = window.single();
-    if let Some(position) = window.cursor_position() {
-        let mut img_transform= cursor.single_mut();
-        img_transform.left = Val::Px(position.x);
-        img_transform.top = Val::Px(position.y);
-    }
 }
 
 fn initialise_renet_transport_client(app: &mut App) {
@@ -521,7 +300,7 @@ fn initialise_renet_transport_client(app: &mut App) {
     let transport = NetcodeClientTransport::new(current_time, authentication, socket).unwrap();
     
     app.add_plugins(NetcodeClientPlugin);
-    app.configure_sets(Update, Connected.run_if(client_connected()));
+    app.configure_sets(Update, Connected.run_if(client_connected));
 
     app.insert_resource(client)
         .insert_resource(transport)
@@ -544,264 +323,6 @@ fn get_window(window: Query<&Window>) {
     let width = window.width();
     let height = window.height();
     dbg!(width, height);
-}
-
-fn wall_collision(
-    player_pos: Vec3,
-    wall_query: &Query<&Transform, (With<TileCollider>, Without<Player>)>
-) -> bool {
-    for wall_transform in wall_query.iter() {
-        let collision = collide(
-            player_pos, 
-            Vec2::splat(16.0 * 6.0 * 0.5), 
-            wall_transform.translation, 
-            Vec2::splat(16.0 * 6.0)
-        );
-        if collision.is_some() {
-            return false;
-        }
-    }
-    return true;
-}
-
-fn keyboard_input_system(
-    keyboard_input: Res<Input<KeyCode>>, 
-    mut player_input: ResMut<PlayerInput>,
-    mut player_position: ResMut<PlayerPosition>,
-    wall_query: Query<&Transform, (With<TileCollider>, Without<Player>)>
-) {
-    let mut direction = Vec3::ZERO;
-    let current_position = player_position.transform;
-
-
-    if keyboard_input.pressed(KeyCode::A) {
-        if wall_collision(current_position + Vec3::new(-2.0, 0.0, 0.0), &wall_query) {
-            direction.x -= 1.0;
-        }
-    }
-
-    if keyboard_input.pressed(KeyCode::D) {
-        if wall_collision(current_position + Vec3::new(2.0, 0.0, 0.0), &wall_query) {
-            direction.x += 1.0;
-        }
-    }
-
-    if keyboard_input.pressed(KeyCode::W) {
-        if wall_collision(current_position + Vec3::new(0.0, 2.0, 0.0), &wall_query) {
-            direction.y += 1.0;
-        }
-    }
-
-    if keyboard_input.pressed(KeyCode::S) {
-        if wall_collision(current_position + Vec3::new(0.0, -2.0, 0.0), &wall_query) {
-            direction.y -= 1.0;
-        }
-    }
-
-    player_input.left = keyboard_input.pressed(KeyCode::A) || keyboard_input.pressed(KeyCode::Left);
-    player_input.right = keyboard_input.pressed(KeyCode::D) || keyboard_input.pressed(KeyCode::Right);
-    player_input.up = keyboard_input.pressed(KeyCode::W) || keyboard_input.pressed(KeyCode::Up);
-    player_input.down = keyboard_input.pressed(KeyCode::S) || keyboard_input.pressed(KeyCode::Down);
-
-    // for mut sprite in &mut sprite_query {
-    //     if player_input.left {
-    //         sprite.flip_x = true;
-    //     } else if player_input.right {
-    //         sprite.flip_x = false;
-    //     }
-    // }
-    
-    player_position.transform += direction * 5.0;
-}
-
-fn mouse_button_input_system(
-    mouse_input: Res<Input<MouseButton>>,
-    window_query: Query<&Window, With<PrimaryWindow>>,
-    camera_query: Query<(&Camera, &GlobalTransform), With<PlayerCamera>>,
-    mut commands: Commands,
-    // sword_sprite: Res<SwordSpriteAtlas>,
-    fireball_sprite: Res<FireBallSpriteAtlas>,
-    icespike_sprite: Res<IceSpikeSpriteAtlas>,
-    cursor_coord: Res<CursorWorldCoordinates>,
-    selected_spell: Res<SelectedSpell>,
-    mut spell_cooldown: ResMut<SpellCoolDown>
-) {
-    let (camera, camera_transform) = camera_query.single();
-    let window = window_query.single();
-
-    if mouse_input.just_pressed(MouseButton::Right) {
-        if let Some(world_position) = window.cursor_position()
-            .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
-            .map(|ray| ray.origin.truncate()) {
-                println!("Pressed left mouse button");
-                println!("Cursor position is: {},{}", world_position.x, world_position.y);
-                //sword_attack_animation(&mut commands, &sword_sprite, &world_position, &camera_transform.translation());
-                if spell_cooldown.timer.finished() {
-                    spell_cooldown.timer.set_duration(Duration::from_secs(2));
-                    if selected_spell.spell == Spells::FireBall {
-                        fireball_attack_animation(&mut commands, &fireball_sprite, &cursor_coord, &camera_transform.translation());
-                    }
-                    if selected_spell.spell == Spells::IceSpike {
-                        icespike_attack_animation(&mut commands, &icespike_sprite, &cursor_coord, &camera_transform.translation())
-                    }
-                }
-                else {
-                    println!("Spells are on cooldown");
-                }
-        }
-    }    
-}
-
-fn icespike_attack_animation(
-    commands: &mut Commands,
-    magic_sprite: &Res<IceSpikeSpriteAtlas>,
-    cursor_coord: &Res<CursorWorldCoordinates>,
-    position_player: &Vec3,
-) {
-    let animation_indices = AnimationIndices { first: 0, last: 44};
-    let sprite_head_offset = 29.0;
-
-    let direction_vector_normalized = (cursor_coord.0.truncate() - position_player.truncate()).normalize();
-    let sprite_spawn_position = position_player.truncate() + (direction_vector_normalized * 65.0);
-    let angle = direction_vector_normalized.angle_between(Vec2 { x: 1.0, y: 0.0 });
-
-    commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: magic_sprite.handle.clone(),
-            sprite: TextureAtlasSprite::new(animation_indices.first),
-            transform: Transform {
-                translation: Vec3::new(sprite_spawn_position.x, sprite_spawn_position.y, 1.0),
-                scale: Vec3::new(-SCALE/2.0, SCALE/2.0, 1.0),
-                rotation: Quat::from_rotation_z(-angle + PI),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-        CastSpell {
-            spell_type: Spells::IceSpike,
-            start_pos: sprite_spawn_position.extend(1.0),
-            direction: direction_vector_normalized,
-            velocity: 600.0,
-            collision_offset: sprite_head_offset
-        },
-        SpellFlightTime {timer: Timer::new(Duration::from_secs(1), TimerMode::Once)},
-        animation_indices.clone(),
-        AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
-    ));
-}
-
-fn fireball_attack_animation(
-    commands: &mut Commands,
-    magic_sprite: &Res<FireBallSpriteAtlas>,
-    cursor_coord: &Res<CursorWorldCoordinates>,
-    position_player: &Vec3,
-) {
-    let animation_indices = AnimationIndices { first: 0, last: 44};
-    let sprite_head_offset = 18.0 * 2.0;
-
-    let direction_vector_normalized = (cursor_coord.0.truncate() - position_player.truncate()).normalize();
-    let sprite_spawn_position = position_player.truncate() + (direction_vector_normalized * 65.0);
-    let angle = direction_vector_normalized.angle_between(Vec2 { x: 1.0, y: 0.0 });
-
-    commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: magic_sprite.handle.clone(),
-            sprite: TextureAtlasSprite::new(animation_indices.first),
-            transform: Transform {
-                translation: Vec3::new(sprite_spawn_position.x, sprite_spawn_position.y, 1.0),
-                scale: Vec3::new(-SCALE/2.0, SCALE/2.0, 1.0),
-                rotation: Quat::from_rotation_z(-angle + PI),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-        CastSpell { 
-            spell_type: Spells::FireBall,
-            start_pos: sprite_spawn_position.extend(1.0),
-            direction: direction_vector_normalized,
-            velocity: 400.0,
-            collision_offset: sprite_head_offset 
-        },
-        SpellFlightTime {timer: Timer::new(Duration::from_secs(1), TimerMode::Once)},
-        animation_indices.clone(),
-        AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
-    ));
-}
-
-fn spell_flight_system(
-    time: Res<Time>,
-    mut cast_spell_query: Query<(&mut Transform, &CastSpell)>
-) {
-    for (mut transform, cast_spell) in cast_spell_query.iter_mut() {
-        let delta_seconds = time.delta_seconds();
-        transform.translation.x += cast_spell.direction.x * delta_seconds * cast_spell.velocity;
-        transform.translation.y += cast_spell.direction.y * delta_seconds * cast_spell.velocity;
-    }
-}
-
-fn sword_attack_animation(
-    commands: &mut Commands,
-    sword_sprite: &Res<SwordSpriteAtlas>,
-    position_cursor: &Vec2,
-    position_player: &Vec3,
-) {
-    let animation_indices = AnimationIndices { first: 0, last: 4};
-
-    commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: sword_sprite.handle.clone(),
-            sprite: TextureAtlasSprite::new(animation_indices.first),
-            transform: Transform {
-                translation: Vec3::new(position_player.x, position_player.y, 1.0),
-                scale: Vec3::new(SCALE/2.0, SCALE/2.0, 1.0),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-        Sword{ curent_index: 0 },
-        animation_indices.clone(),
-        AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
-    ));
-}
-
-fn sword_follow_cursor(
-    mut sword_transform: Query<&mut Transform, With<Equipment>>,
-    player_transform: Query<(&Transform, With<ControllablePlayer>, Without<Equipment>)>,
-    cursor_position: Res<CursorWorldCoordinates>,
-) {
-    let distance_from_player: f32 = 60.0;
-    for mut sword_translation in sword_transform.iter_mut() {
-        if let Ok(player_translation) = player_transform.get_single() {
-            let direction_vector_normalized = (cursor_position.0.truncate() - player_translation.0.translation.truncate()).normalize();
-            sword_translation.translation.x = player_translation.0.translation.x + (direction_vector_normalized.x * distance_from_player);
-            sword_translation.translation.y = player_translation.0.translation.y + (direction_vector_normalized.y * distance_from_player);
-            let angle = direction_vector_normalized.angle_between(Vec2 { x: 1.0, y: 0.0 });
-
-            if angle <= 0.0 && angle >= -PI/2.0 {
-                sword_translation.rotation = Quat::from_rotation_z(-angle);
-            }
-            if angle <= -PI/2.0 && angle >= -PI {
-                sword_translation.rotation = Quat::from_rotation_z(-angle + PI);
-            }
-            if angle > 0.0 && angle <= PI/2.0 {
-                sword_translation.rotation = Quat::from_rotation_z(-angle);
-            }
-            if angle > PI/2.0 && angle <= PI {
-                sword_translation.rotation = Quat::from_rotation_z(-angle + PI);
-            }
-        }
-    }
-}
-
-fn despawn_sword_animation(
-    mut commands: Commands,
-    entity_query: Query<(Entity, &TextureAtlasSprite), With<Sword>>
-) {
-    for (entity, sprite) in entity_query.iter() {
-        if sprite.index == 4 {
-            commands.entity(entity).despawn();
-        }
-    }
 }
 
 fn label_movement(
@@ -852,8 +373,11 @@ fn client_sync_players(
                 println!("Player {} connected.", id); 
                 let mut client_entity = commands.spawn((
                     SpriteSheetBundle {
-                        texture_atlas: player_sprite.handle.clone(),
-                        sprite: TextureAtlasSprite::new(animation_indices.first),
+                        texture: player_sprite.image.clone(),
+                        atlas: TextureAtlas {
+                            layout: player_sprite.layout.clone(),
+                            index: animation_indices.first,
+                        },
                         transform: Transform {
                             translation: Vec3 { x: translation[0], y: translation[1], z: 1.0 },
                             rotation: Quat::default(),
@@ -909,7 +433,7 @@ fn client_sync_players(
 
 fn animate_sprite(
     time: Res<Time>,
-    mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlasSprite)>,
+    mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
 ) {
     for (indices, mut timer, mut sprite) in &mut query {
         timer.tick(time.delta());
@@ -924,14 +448,14 @@ fn animate_sprite(
 }
 
 fn camera_follow_player(
-    player_query: Query<(&Transform, With<ControllablePlayer>)>,
+    player_query: Query<&Transform, With<ControllablePlayer>>,
     mut camera_query: Query<(&mut Transform, &PlayerCamera), Without<ControllablePlayer>>,
 ) {
     if let Ok(player_transform) = player_query.get_single() {
         if let Ok(mut camera_tranform) = camera_query.get_single_mut() {
             camera_tranform.0.translation = Vec3::lerp(
                 camera_tranform.0.translation, 
-                player_transform.0.translation.extend(camera_tranform.0.translation.z).truncate(), 
+                player_transform.translation.extend(camera_tranform.0.translation.z).truncate(), 
                 0.3
             );
         }
