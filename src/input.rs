@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
+use crate::player::{AnimationState, ControllablePlayer, PlayerAnimationStates};
 use crate::{CursorWorldCoordinates, PlayerCamera, PlayerInput, PlayerPosition};
 
 use crate::magic::{icespike_attack_animation, FireBallSpriteAtlas, IceSpikeSpriteAtlas, SelectedSpell, Spells};
@@ -10,6 +11,7 @@ pub struct InputPlugin;
 
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
+        app.insert_resource(PlayerInput::default());
         app.add_systems(Update, (keyboard_input_system, mouse_button_input_system));
     }
 }
@@ -36,31 +38,48 @@ fn keyboard_input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>, 
     mut player_input: ResMut<PlayerInput>,
     mut player_position: ResMut<PlayerPosition>,
+    mut animation_state_query: Query<&mut AnimationState, With<ControllablePlayer>>,
     // wall_query: Query<&Transform, (With<TileCollider>, Without<Player>)>
 ) {
     let mut direction = Vec3::ZERO;
     // let current_position = player_position.transform;
 
+    for mut state in &mut animation_state_query {
+        state.state = PlayerAnimationStates::IDLE;
+    }
+
     if keyboard_input.pressed(KeyCode::KeyA) {
         // if wall_collision(current_position + Vec3::new(-2.0, 0.0, 0.0), &wall_query) {
+            for mut state in &mut animation_state_query {
+                state.state = PlayerAnimationStates::RUNNING;
+            }
             direction.x -= 1.0;
         // }
     }
 
     if keyboard_input.pressed(KeyCode::KeyD) {
         // if wall_collision(current_position + Vec3::new(2.0, 0.0, 0.0), &wall_query) {
+            for mut state in &mut animation_state_query {
+                state.state = PlayerAnimationStates::RUNNING;
+            }
             direction.x += 1.0;
         // }
     }
 
     if keyboard_input.pressed(KeyCode::KeyW) {
         // if wall_collision(current_position + Vec3::new(0.0, 2.0, 0.0), &wall_query) {
+            for mut state in &mut animation_state_query {
+                state.state = PlayerAnimationStates::RUNNING;
+            }
             direction.y += 1.0;
         // }
     }
 
     if keyboard_input.pressed(KeyCode::KeyS) {
         // if wall_collision(current_position + Vec3::new(0.0, -2.0, 0.0), &wall_query) {
+            for mut state in &mut animation_state_query {
+                state.state = PlayerAnimationStates::RUNNING;
+            }
             direction.y -= 1.0;
         // }
     }

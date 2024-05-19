@@ -652,8 +652,6 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
- "bevy_ecs 0.13.2",
- "bevy_egui",
  "bevy_renet",
  "bincode",
  "fastrand 2.1.0",

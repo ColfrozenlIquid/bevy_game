@@ -9,6 +9,8 @@
 
 // impl Plugin for LevelPlugin {
 //     fn build(&self, app: &mut App) {
+//         app.add_systems(Startup, setup);
+//         // app.add_plugins(LdtkPlugin);
 //         // app.insert_resource(LevelSelection::index(1))
 //         // .insert_resource(LdtkSettings {
 //         //     level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation { 
@@ -25,9 +27,10 @@
 //     mut commands: Commands,
 //     asset_server: Res<AssetServer>,
 // ){
+//     let ldtk_handle: Handle<_> = asset_server.load(LEVEL_0_PATH);
 //     commands.spawn(
 //         LdtkWorldBundle {
-//             ldtk_handle: asset_server.load(LEVEL_0_PATH),
+//             ldtk_handle: ldtk_handle,
 //             ..Default::default()
 //         });
 // }

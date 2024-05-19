@@ -36,14 +36,13 @@ fn setup_game_cursor(
         },
         GameCursor
     ));
-    println!("Spawned cursor sprite");
 }
 
 fn cursor_system(
     mut cursor_coords: ResMut<CursorWorldCoordinates>,
     query_window: Query<&Window, With<PrimaryWindow>>,
     query_camera: Query<(&Camera, &GlobalTransform), With<PlayerCamera>>,
-){
+) {
     let (camera, camera_transform) = query_camera.single();
     let window = query_window.single();
 
@@ -51,7 +50,7 @@ fn cursor_system(
         .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
         .map(|ray| ray.origin) {
             cursor_coords.0 = world_position;
-        }
+    }
 }
 
 fn move_cursor(

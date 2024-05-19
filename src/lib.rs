@@ -8,14 +8,29 @@ pub mod input;
 pub mod cursor;
 pub mod melee;
 pub mod spritesheet;
+pub mod game;
+pub mod network;
+pub mod player;
 
 use std::time::Duration;
-
-use bevy::{ecs::{component::Component, entity::Entity, event::Event, schedule::States, system::Resource}, math::Vec3};
-use bevy_renet::renet::{ChannelConfig, ClientId, ConnectionConfig, SendType};
+use bevy::{
+    ecs::{component::Component, entity::Entity, event::Event, schedule::States, system::Resource},
+    math::Vec3, render::color::Color
+};
+use bevy_renet::renet::{
+    ChannelConfig, ClientId, ConnectionConfig, SendType
+};
 use serde::{Deserialize, Serialize};
 
 pub const PROTOCOL_ID: u64 = 7;
+
+const SWORD_SPRITE_PATH: &str = ".\\sprites\\sword_anim.png";
+const PLAYER_SPRITE_PATH: &str = ".\\sprites\\vampire_v1_1_animated.png";
+const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
+const PLAYER_SPEED: f32 = 500.0;
+const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
+const SWORD_EQUIPED_SPRITE_PATH: &str = ".\\sprites\\sword.png";
+const SCALE: f32 = 5.0;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum AppState {
@@ -33,7 +48,6 @@ pub struct CursorWorldCoordinates(pub Vec3);
 
 #[derive(Component, Default)]
 pub struct PlayerCamera;
-
 
 #[derive(Debug, Component)]
 pub struct Player {

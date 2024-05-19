@@ -3,7 +3,18 @@ use std::io::Read;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::AppState;
+use crate::{player::PlayerSpriteAtlas, AppState, PLAYER_SPRITE_PATH};
+
+const SPRITE_ATLAS_PATH: &str = "./assets/spritesheets/sprite_atlas.json";
+const SPRITE_PATH: &str = "./assets/spritesheets/sprites.json";
+pub const ANGEL_IDLE: &str = "angel_idle_anim";
+pub const ANGEL_RUN: &str = "angel_run_anim";
+pub const DWARF_F_IDLE: &str = "dwarf_f_idle_anim";
+pub const DWARF_F_RUN: &str = "dwarf_f_run_anim";
+
+pub const KNIGHT_M_IDLE: &str = "knight_m_idle_anim";
+pub const KNIGHT_M_RUN: &str = "knight_m_run_anim";
+pub const KNIGHT_M_HIT: &str = "knight_m_hit_anim";
 
 pub struct SpriteSheetPlugin;
 
@@ -20,14 +31,6 @@ pub struct TextureAtlases {
 pub struct SpriteCollection {
     pub sprites: Vec<JSONSprite>,
 }
-
-const SPRITE_ATLAS_PATH: &str = "./assets/spritesheets/sprite_atlas.json";
-const SPRITE_PATH: &str = "./assets/spritesheets/sprites.json";
-
-pub const ANGEL_IDLE: &str = "angel_idle_anim";
-pub const ANGEL_RUN: &str = "angel_run_anim";
-pub const DWARF_F_IDLE: &str = "dwarf_f_idle_anim";
-pub const DWARF_F_RUN: &str = "dwarf_f_run_anim";
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct JSONSpriteAtlas {
@@ -63,11 +66,21 @@ fn setup(
     mut texture_atlasses: ResMut<TextureAtlases>,
     mut sprites_collection: ResMut<SpriteCollection>,
     mut menu_state: ResMut<NextState<AppState>>,
+    mut player_sprite: ResMut<PlayerSpriteAtlas>,
 ) {
+    println!("Loading spritesheet plugin");
     let mut file = File::open(SPRITE_ATLAS_PATH).expect("Failed to open file");
     let mut contents = String::new();
     file.read_to_string(&mut contents).expect("Failed to read file contents");
     let spriteatlas_vector: Vec<JSONSpriteAtlas> = serde_json::from_str(&contents).unwrap();
+
+    {
+        let texture = asset_server.load(PLAYER_SPRITE_PATH);
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(16.0, 16.0), 4, 1, None, None);
+        let texture_atlas_layout_handle = texture_atlas_layouts.add(layout);
+        player_sprite.image = texture;
+        player_sprite.layout = texture_atlas_layout_handle;
+    }
 
     for sprite_atlas in spriteatlas_vector.iter() {
         let texture: Handle<Image> = asset_server.load(sprite_atlas.file_name.to_owned());
@@ -92,11 +105,11 @@ fn setup(
 
     println!("Gets here spritesheet");
 
-    // {
-    //     for sprites in &sprites_collection.sprites {
-    //         println!("{}", sprites.name);
-    //     }
-    // }
+    {
+        for sprites in &sprites_collection.sprites {
+            println!("{}", sprites.name);
+        }
+    }
     menu_state.set(AppState::InGame);
 }
 
@@ -114,4 +127,27 @@ pub fn get_jsonsprite_by_type(requested_sprite: &str, sprite_collection: &Res<Sp
         frame_count: 0,
         frame_index: vec![("".to_string(), 0)]
     };
+}
+
+pub fn get_sprite(
+    requested_sprite: String, 
+    atlases: &TextureAtlases,
+    sprite_collection: &SpriteCollection,
+) -> ((Handle<TextureAtlasLayout>, Handle<Image>, JSONSpriteAtlas), JSONSprite)
+{
+    let mut requested_atlas_name = String::new();
+    let mut json_sprite = JSONSprite { file_name: "Error".to_owned(), name: "Error".to_owned(), frame_count: 0, frame_index: Vec::new() };
+    for sprite in &sprite_collection.sprites {
+        if sprite.name == requested_sprite {
+            requested_atlas_name = sprite.file_name.clone();
+            json_sprite = sprite.clone();
+        }
+    }
+    for atlas in &atlases.handles {
+        if atlas.2.file_name == requested_atlas_name {
+            println!("Found sprite atlas handles");
+            return (atlas.clone(), json_sprite);
+        }
+    }
+    return (atlases.handles[0].clone(), JSONSprite { file_name: "Error".to_owned(), name: "Error".to_owned(), frame_count: 0, frame_index: Vec::new() });
 }
