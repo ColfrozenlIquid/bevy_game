@@ -1,9 +1,11 @@
+use std::default;
+
 use bevy::prelude::*;
 use crate::{game::AnimationTimer, spritesheet::*, AppState, PlayerPosition, SCALE};
 
 pub struct PlayerPlugin;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum PlayerAnimationStates {
     IDLE,
     RUNNING,
@@ -13,7 +15,6 @@ pub enum PlayerAnimationStates {
 #[derive(Component)]
 pub struct AnimationState {
     pub state: PlayerAnimationStates,
-    pub sprite_index: Vec<(PlayerAnimationStates, Vec<usize>)>
 }
 
 #[derive(Component, Clone)]
@@ -34,6 +35,12 @@ pub struct PlayerSpriteAtlas {
 #[derive(Component)]
 pub struct ControllablePlayer;
 
+pub struct AnimatedSprite {
+    texture: Handle<Image>,
+    atlas_layout: Handle<TextureAtlasLayout>,
+    animation_states: Vec<(PlayerAnimationStates, Vec<usize>)>,
+}
+
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGame), setup);
@@ -46,54 +53,75 @@ fn setup(
     texture_atlas: Res<TextureAtlases>,
     sprite_collection: Res<SpriteCollection>,
 ) {
-    let animation_indices = AnimationIndices {first: 0, last: 3};
-    let idle_sprite = get_sprite(KNIGHT_M_IDLE.to_owned(), &texture_atlas, &sprite_collection);
-    let running_sprite = get_sprite(KNIGHT_M_RUN.to_owned(), &texture_atlas, &sprite_collection);
-    let hit_sprite = get_sprite(KNIGHT_M_HIT.to_owned(), &texture_atlas, &sprite_collection);
-    println!("Function worked");
+    let requested_idle_sprite = KNIGHT_M_IDLE.to_owned();
+    let requested_running_sprite = KNIGHT_M_RUN.to_owned();
+    let requested_hit_sprite = KNIGHT_M_HIT.to_owned();
 
-    // let mut sprite_indices = Vec::<(PlayerAnimationStates, Vec<usize>)>::new();
-    
-    // {
-    //     let mut indices = Vec::<usize>::new();
-    //     for index in idle_sprite.1.frame_index {
-    //         indices.push(index.1 as usize);
-    //     }
-    //     sprite_indices.push((PlayerAnimationStates::IDLE, indices));
-    // }
+    let animated_sprite_texture = get_sprite_texture_handle(
+        requested_idle_sprite.clone(), 
+        &texture_atlas, 
+        &sprite_collection
+    ).expect("Could not find sprite texture handle");
 
-    // {
-    //     let mut indices = Vec::<usize>::new();
-    //     for index in running_sprite.1.frame_index {
-    //         indices.push(index.1 as usize);
-    //     }
-    //     sprite_indices.push((PlayerAnimationStates::RUNNING, indices));
-    // }
+    let animated_sprite_atlas_layout = get_sprite_atlas_layout(
+        requested_idle_sprite.clone(), 
+        &texture_atlas, 
+        &sprite_collection
+    ).expect("Could not find sprite texture atlas layout");
 
-    // {
-    //     let mut indices = Vec::<usize>::new();
-    //     for index in hit_sprite.1.frame_index {
-    //         indices.push(index.1 as usize);
-    //     }
-    //     sprite_indices.push((PlayerAnimationStates::HIT, indices));
-    // }
 
-    // let animation_state = AnimationState { 
-    //     state: PlayerAnimationStates::IDLE ,
-    //     sprite_index: sprite_indices 
-    // };
+    let mut animated_sprite = AnimatedSprite {
+        texture: animated_sprite_texture,
+        atlas_layout: animated_sprite_atlas_layout,
+        animation_states: vec![],
+    };
+
+
+    animated_sprite.animation_states.push(
+        get_sprite_animation_states(
+            PlayerAnimationStates::IDLE,
+            requested_idle_sprite,
+            &sprite_collection
+        )
+    );
+
+    animated_sprite.animation_states.push(
+        get_sprite_animation_states(
+            PlayerAnimationStates::RUNNING,
+            requested_running_sprite,
+            &sprite_collection
+        )
+    );
+
+    animated_sprite.animation_states.push(
+        get_sprite_animation_states(
+            PlayerAnimationStates::HIT,
+            requested_hit_sprite,
+            &sprite_collection
+        )
+    );
+
+    let mut default_sprite_index_first: usize = 0;
+    let mut default_sprite_index_last: usize = 0;
+    for (animation_state, indices) in animated_sprite.animation_states {
+        if animation_state == PlayerAnimationStates::IDLE {
+            default_sprite_index_first = indices[0];
+            default_sprite_index_last = *indices.last().unwrap();
+        }
+    }
+
+    let animation_indices = AnimationIndices {
+        first: default_sprite_index_first,
+        last: default_sprite_index_last
+    };
 
     {
-        let animation_indices = AnimationIndices {
-            first: idle_sprite.1.frame_index[0].1 as usize, 
-            last: ((idle_sprite.1.frame_index[0].1) + (idle_sprite.1.frame_count - 1)) as usize};
-
         let mut player_entity = commands.spawn((
             SpriteSheetBundle {
-                texture: idle_sprite.0.1.clone(),
+                texture: animated_sprite.texture,
                 atlas: TextureAtlas {
-                    layout: idle_sprite.0.0.clone(),
-                    index: idle_sprite.1.frame_index[0].1 as usize,
+                    layout: animated_sprite.atlas_layout,
+                    index: default_sprite_index,
                 },
                 transform: Transform {
                     translation: Vec3 { x: 0.0, y: 0.0, z: 1.0 },
@@ -102,34 +130,14 @@ fn setup(
                 },
                 ..Default::default()
             },
-            animation_indices.clone(),
+            AnimationState { state: PlayerAnimationStates::IDLE },
             PlayerPosition::default(),
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
         ));
         player_entity.insert(ControllablePlayer);
         // player_entity.insert(animation_state);
     }
-    // let mut client_entity = commands.spawn((
-    //     SpriteSheetBundle {
-    //         texture: player_sprite.image.clone(),
-    //         atlas: TextureAtlas {
-    //             layout: player_sprite.layout.clone(),
-    //             index: animation_indices.first,
-    //         },
-    //         transform: Transform {
-    //             translation: Vec3 { x: 0.0, y: 0.0, z: 1.0 },
-    //             rotation: Quat::default(),
-    //             scale: Vec3 { x: SCALE, y: SCALE, z: SCALE }
-    //         },
-    //         ..Default::default()
-    //     },
-    //     // PlayerLabel,
-    //     animation_indices.clone(),
-    //     PlayerPosition::default(),
-    //     PlayerAnimationState::default(),
-    //     AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-    // ));
-    // client_entity.insert(ControllablePlayer);
+
 }
 
 fn show_player_animation_state(
@@ -155,6 +163,22 @@ fn animate_sprite(
         }
     }
 }
+
+// fn animate_sprite(
+//     time: Res<Time>,
+//     mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
+// ) {
+//     for (indices, mut timer, mut sprite) in &mut query {
+//         timer.tick(time.delta());
+//         if timer.just_finished() {
+//             sprite.index = if sprite.index == indices.last {
+//                 indices.first
+//             } else {
+//                 sprite.index + 1
+//             };
+//         }
+//     }
+// }
 
 fn label_movement(
     mut set: ParamSet<(

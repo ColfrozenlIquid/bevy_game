@@ -3,7 +3,7 @@ use std::io::Read;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::{player::PlayerSpriteAtlas, AppState, PLAYER_SPRITE_PATH};
+use crate::{player::{PlayerAnimationStates, PlayerSpriteAtlas}, AppState, PLAYER_SPRITE_PATH};
 
 const SPRITE_ATLAS_PATH: &str = "./assets/spritesheets/sprite_atlas.json";
 const SPRITE_PATH: &str = "./assets/spritesheets/sprites.json";
@@ -150,4 +150,64 @@ pub fn get_sprite(
         }
     }
     return (atlases.handles[0].clone(), JSONSprite { file_name: "Error".to_owned(), name: "Error".to_owned(), frame_count: 0, frame_index: Vec::new() });
+}
+
+pub fn get_sprite_texture_handle(
+    requested_sprite: String, 
+    atlases: &TextureAtlases,
+    sprite_collection: &SpriteCollection,
+) -> Option<Handle<Image>> {
+    let mut requested_atlas_name = String::new();
+
+    for sprite in &sprite_collection.sprites {
+        if sprite.name == requested_sprite {
+            requested_atlas_name = sprite.file_name.clone();
+        }
+    }
+
+    for atlas in &atlases.handles {
+        if atlas.2.file_name == requested_atlas_name {
+            return Some(atlas.1.clone());
+        }
+    }
+    None
+}
+
+pub fn get_sprite_atlas_layout(
+    requested_sprite: String, 
+    atlases: &TextureAtlases,
+    sprite_collection: &SpriteCollection,
+) -> Option<Handle<TextureAtlasLayout>> {
+    let mut requested_atlas_name = String::new();
+
+    for sprite in &sprite_collection.sprites {
+        if sprite.name == requested_sprite {
+            requested_atlas_name = sprite.file_name.clone();
+        }
+    }
+
+    for atlas in &atlases.handles {
+        if atlas.2.file_name == requested_atlas_name {
+            return Some(atlas.0.clone());
+        }
+    }
+    None
+}
+
+pub fn get_sprite_animation_states(
+    requested_state: PlayerAnimationStates,
+    requested_sprite: String, 
+    sprite_collection: &SpriteCollection,
+) -> (PlayerAnimationStates, Vec<usize>) {
+    let mut indices = Vec::<usize>::new();
+
+    for sprite in &sprite_collection.sprites {
+        if sprite.name == requested_sprite {
+            for (_name, index) in &sprite.frame_index {
+                indices.push(*index as usize);
+            }
+        }
+    }
+
+    return (requested_state, indices);
 }
