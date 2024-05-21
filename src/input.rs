@@ -7,7 +7,8 @@ use crate::{AppState, CursorWorldCoordinates, PlayerCamera, PlayerInput, PlayerP
 use crate::magic::{icespike_attack_animation, FireBallSpriteAtlas, IceSpikeSpriteAtlas, SelectedSpell, Spells};
 use crate::magic::fireball_attack_animation;
 
-pub const SPEED: f32 = 0.5;
+pub const SPEED: f32 = 200.0;
+
 pub struct InputPlugin;
 
 impl Plugin for InputPlugin {
@@ -89,27 +90,24 @@ fn keyboard_input_system(
     }
 
     for mut velocity in &mut player_velocity_query {
-        let mut velocity = Vec2::ZERO;
+        let mut new_velocity = Vec2::ZERO;
 
         if keyboard_input.pressed(KeyCode::KeyA) {
-            player_velocity.0 = Vec2::new(-1.0 * SPEED, 0.0);
-            velocity.x = -SPEED;
+            new_velocity.x = -SPEED;
         }
 
         if keyboard_input.pressed(KeyCode::KeyD) {
-                player_velocity.0 = Vec2::new(1.0 * SPEED, 0.0);
-                velocity.x
+            new_velocity.x = SPEED;
         }
 
         if keyboard_input.pressed(KeyCode::KeyW) {
-                player_velocity.0 = Vec2::new(0.0, 1.0 * SPEED);
-                velocity = Vec3::new(0.0, 1.0 * SPEED, 0.0);
+            new_velocity.y = SPEED;
         }
 
         if keyboard_input.pressed(KeyCode::KeyS) {
-                player_velocity.0 = Vec2::new(0.0, -1.0 * SPEED);
-                velocity = Vec3::new(0.0, -1.0 * SPEED, 0.0);
+            new_velocity.y = -SPEED;
         }
+        velocity.0 = new_velocity;
     }
 
     // if keyboard_input.just_released(KeyCode::KeyW) {
@@ -194,12 +192,12 @@ fn keyboard_input_system(
     //         velocity = Vec3::new(0.0, -1.0 * SPEED, 0.0);
     // }
 
-    player_input.left = keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft);
-    player_input.right = keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight);
-    player_input.up = keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp);
-    player_input.down = keyboard_input.pressed(KeyCode::KeyS) || keyboard_input.pressed(KeyCode::ArrowDown);
+    // player_input.left = keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft);
+    // player_input.right = keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight);
+    // player_input.up = keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp);
+    // player_input.down = keyboard_input.pressed(KeyCode::KeyS) || keyboard_input.pressed(KeyCode::ArrowDown);
     
-    player_position.transform += velocity * 5.0;
+    // player_position.transform += velocity * 5.0;
 }
 
 fn mouse_button_input_system(
@@ -217,7 +215,7 @@ fn mouse_button_input_system(
     let (camera, camera_transform) = camera_query.single();
     let window = window_query.single();
 
-    if mouse_input.pressed(MouseButton::Right) {
+    if mouse_input.just_pressed(MouseButton::Right) {
         if let Some(world_position) = window.cursor_position()
             .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
             .map(|ray| ray.origin.truncate()) {

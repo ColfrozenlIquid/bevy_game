@@ -16,6 +16,12 @@ pub const KNIGHT_M_IDLE: &str = "knight_m_idle_anim";
 pub const KNIGHT_M_RUN: &str = "knight_m_run_anim";
 pub const KNIGHT_M_HIT: &str = "knight_m_hit_anim";
 
+pub const LIZARD_M_IDLE: &str = "lizard_m_idle_anim";
+pub const LIZARD_M_RUN: &str = "lizard_m_run_anim";
+pub const LIZARD_M_HIT: &str = "lizard_m_hit_anim";
+
+pub const SLUG_ANIM: &str = "slug_anim";
+
 pub struct SpriteSheetPlugin;
 
 #[derive(Resource, Default)]

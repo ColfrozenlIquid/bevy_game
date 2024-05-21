@@ -1,7 +1,7 @@
 use std::default;
 
 use bevy::{prelude::*, sprite};
-use crate::{game::AnimationTimer, spritesheet::*, AppState, PlayerPosition, SCALE};
+use crate::{game::AnimationTimer, spritesheet::*, AppState, CursorWorldCoordinates, PlayerPosition, SCALE};
 
 pub struct PlayerPlugin;
 
@@ -20,6 +20,9 @@ pub enum Facing {
     LEFT,
     RIGHT,
 }
+
+#[derive(Component)]
+pub struct PlayerMoving(bool);
 
 #[derive(Component, Clone)]
 pub struct AnimationIndices {
@@ -60,7 +63,7 @@ pub struct AnimatedSprite {
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGame), setup);
-        app.add_systems(Update, (animate_sprite, update_sprite_facing, debug_player_velocity, move_sprite).run_if(in_state(AppState::InGame)));
+        app.add_systems(Update, (animate_sprite, update_sprite_facing, move_sprite, player_sprite_follow_mouse).run_if(in_state(AppState::InGame)));
     }
 }
 
@@ -69,9 +72,9 @@ fn setup(
     texture_atlas: Res<TextureAtlases>,
     sprite_collection: Res<SpriteCollection>,
 ) {
-    let requested_idle_sprite = KNIGHT_M_IDLE.to_owned();
-    let requested_running_sprite = KNIGHT_M_RUN.to_owned();
-    let requested_hit_sprite = KNIGHT_M_HIT.to_owned();
+    let requested_idle_sprite = LIZARD_M_IDLE.to_owned();
+    let requested_running_sprite = LIZARD_M_RUN.to_owned();
+    let requested_hit_sprite = LIZARD_M_HIT.to_owned();
 
     let animated_sprite_texture = get_sprite_texture_handle(
         requested_idle_sprite.clone(), 
@@ -152,7 +155,7 @@ fn setup(
                 transform: Transform {
                     translation: Vec3 { x: 0.0, y: 0.0, z: 1.0 },
                     rotation: Quat::default(),
-                    scale: Vec3 { x: SCALE/1.5, y: SCALE/1.5, z: SCALE/1.5 },
+                    scale: Vec3 { x: SCALE/1.2, y: SCALE/1.2, z: 1.0 },
                 },
 
                 ..Default::default()
@@ -160,6 +163,7 @@ fn setup(
             SpriteFacing { facing: Facing::RIGHT },
             animation_indices.clone(),
             PlayerPosition::default(),
+            PlayerMoving(false),
             Velocity(Vec2::ZERO),
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
         ));
@@ -246,21 +250,36 @@ fn update_sprite_facing(
 
 fn move_sprite(
     time: Res<Time>,
-    mut sprite_query: Query<(&Velocity, &mut Transform, &PlayerPosition), With<ControllablePlayer>>,
+    mut sprite_query: Query<(&Velocity, &mut Transform, &mut PlayerPosition), With<ControllablePlayer>>,
 ) {
-    let (velocity, mut transform, player_position) = sprite_query.single_mut();
-    // println!("Current player transform is: {:?}", transform.translation);
+    for (velocity, mut transform, mut player_position) in &mut sprite_query {
+        player_position.transform += Vec3::new(velocity.0.x, velocity.0.y, 0.0) * time.delta_seconds();
+        player_position.transform.z = 1.0;
+        transform.translation = player_position.transform;
+    }
+}
 
-            transform.translation.x = player_position.transform.x * time.delta_seconds();
-            transform.translation.y = player_position.transform.y * time.delta_seconds();
-            // println!("Transform after translation is: {:?}", transform.translation);
+fn player_sprite_follow_mouse(
+    mut player_moving_query: Query<(&PlayerMoving, &mut Sprite, &PlayerPosition), With<ControllablePlayer>>,
+    cursor_coordinate: Res<CursorWorldCoordinates>,
+) {
+    for (player_moving, mut sprite, player_position) in &mut player_moving_query {
+        if !player_moving.0 {
+            if cursor_coordinate.0.x >= player_position.transform.x {
+                sprite.flip_x = false;
+            }
+            if cursor_coordinate.0.x < player_position.transform.x {
+                sprite.flip_x = true;
+            }
+        }
+    }
 }
 
 fn debug_player_velocity(
     player_velocity_query: Query<&Velocity, With<ControllablePlayer>>
 ) {
     let player_velocity = player_velocity_query.get_single().unwrap();
-    // println!("Player velocity is: {:?}", player_velocity.0);
+    println!("Player velocity is: {:?}", player_velocity.0);
 }
 
 fn label_movement(
