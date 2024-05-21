@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_game_client::cursor::CursorPlugin;
 use bevy_game_client::game::GamePlugin;
 use bevy_game_client::input::InputPlugin;
+use bevy_game_client::level::LevelPlugin;
 use bevy_game_client::magic::MagicPlugin;
 use bevy_game_client::mainmenu::menu::MenuPlugin;
 use bevy_game_client::player::PlayerPlugin;
@@ -26,6 +27,7 @@ fn main() {
         .add_plugins(GamePlugin)
         .add_plugins(PlayerPlugin)
         // .add_plugins(NetworkPlugin)
+        .add_plugins(LevelPlugin)
         .add_plugins(SpriteSheetPlugin)
         .init_state::<AppState>();
 

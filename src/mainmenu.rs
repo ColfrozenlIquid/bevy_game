@@ -30,7 +30,7 @@ pub mod menu {
                 .add_systems(OnEnter(MenuState::Main), main_menu_setup)
                 .add_systems(OnExit(MenuState::Main), despawn_screen::<MainMenuScreen>)
 
-                .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
+                .add_systems(OnEnter(MenuState::Settings), continue_menu_setup)
                 .add_systems(OnExit(MenuState::Settings), despawn_screen::<SettingsMenuScreen>)
 
                 .add_systems(OnEnter(MenuState::Continue), continue_menu_setup)
