@@ -95,7 +95,6 @@ impl Plugin for MagicPlugin {
             spell_flight_system,
             select_spell_system,
             enable_spell_cooldown,
-            show_spell_cooldown_timer,
             cursor_system,
             despawn_fireball_spell_collision,
             despawn_icespike_spell_collision,
@@ -409,10 +408,3 @@ fn enable_spell_cooldown(
 ) {
     spell_cooldown.timer.tick(time.delta());
 }
-
-fn show_spell_cooldown_timer(
-    // spell_cooldown: Res<SpellCoolDown>
-) {
-    // println!("{:?}", spell_cooldown.timer);
-}
-
