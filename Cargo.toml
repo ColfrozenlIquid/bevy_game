@@ -3,8 +3,6 @@ name = "bevy_game_client"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [[bin]]
 name = "client"
 path = "src/bin/client.rs"
@@ -12,6 +10,9 @@ path = "src/bin/client.rs"
 [dependencies]
 bevy = "0.13.2"
 bevy-inspector-egui = "0.24.0"
+bevy_ecs = "0.13.2"
+bevy_ecs_tilemap = { git="https://github.com/StarArawn/bevy_ecs_tilemap.git", branch="main" }
+bevy_ecs_ldtk = { git="https://github.com/Trouv/bevy_ecs_ldtk.git", branch="main" }
 # bevy_asset_loader = "0.20.1"
 #bevy_ecs_tilemap = "0.12.0"
 #bevy_asset = "0.13.2"

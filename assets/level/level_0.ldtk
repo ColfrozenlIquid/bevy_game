@@ -29,7 +29,7 @@
 	"minifyJson": false,
 	"externalLevels": false,
 	"exportTiled": false,
-	"simplifiedExport": false,
+	"simplifiedExport": true,
 	"imageExportMode": "None",
 	"exportLevelBg": true,
 	"pngFilePattern": null,

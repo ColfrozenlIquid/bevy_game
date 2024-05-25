@@ -382,7 +382,7 @@ pub fn fireball_attack_animation(
             spell_type: Spells::FireBall,
             _start_pos: sprite_spawn_position.extend(1.0),
             direction: direction_vector_normalized,
-            velocity: 400.0,
+            velocity: 300.0,
             collision_offset: sprite_head_offset 
         },
         SpellFlightTime {timer: Timer::new(Duration::from_secs(1), TimerMode::Once)},
