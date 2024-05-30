@@ -1,6 +1,7 @@
 use std::default;
 
 use bevy::{prelude::*, sprite};
+use bevy_rapier2d::prelude::*;
 use crate::{game::AnimationTimer, spritesheet::*, AppState, CursorWorldCoordinates, PlayerPosition, SCALE};
 
 pub struct PlayerPlugin;
@@ -12,7 +13,7 @@ pub enum PlayerAnimationStates {
     HIT,
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct Velocity(pub Vec2);
 
 #[derive(PartialEq)]
@@ -20,6 +21,9 @@ pub enum Facing {
     LEFT,
     RIGHT,
 }
+
+#[derive(Component)]
+pub struct PlayerColliding(pub bool);
 
 #[derive(Component)]
 pub struct PlayerMoving(bool);
@@ -63,7 +67,8 @@ pub struct AnimatedSprite {
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGame), setup);
-        app.add_systems(Update, (animate_sprite, update_sprite_facing, move_sprite, player_sprite_follow_mouse).run_if(in_state(AppState::InGame)));
+        app.add_systems(Update, (animate_sprite, update_sprite_facing, move_sprite, player_sprite_follow_mouse, collision_events).run_if(in_state(AppState::InGame)));
+        app.add_systems(Update, (update_system).run_if(in_state(AppState::InGame)));
     }
 }
 
@@ -147,9 +152,9 @@ fn setup(
                     flip_x: false,
                     ..Default::default()
                 },
-                texture: animated_sprite.texture,
+                texture: animated_sprite.texture.clone(),
                 atlas: TextureAtlas {
-                    layout: animated_sprite.atlas_layout,
+                    layout: animated_sprite.atlas_layout.clone(),
                     index: animation_indices.first,
                 },
                 transform: Transform {
@@ -169,9 +174,94 @@ fn setup(
         ));
         player_entity.insert(ControllablePlayer);
         player_entity.insert(sprite_animation_states);
+        // player_entity.insert(KinematicCharacterController::default());
+        player_entity.insert(Collider::cuboid(10.0, 10.0));
+        player_entity.insert(RigidBody::Dynamic);
+        player_entity.insert(Name::new("Player"));
+        player_entity.insert(ActiveEvents::COLLISION_EVENTS);
+        player_entity.insert(LockedAxes::ROTATION_LOCKED);
+        player_entity.insert(KinematicCharacterController::default());
+        player_entity.insert(PlayerColliding(false));
+        // player_entity.insert(rigid_body);
         // player_entity.insert(animation_state);
-    }
 
+        let mut bot_entity = commands.spawn((
+            SpriteSheetBundle {
+                sprite: Sprite {
+                    flip_x: false,
+                    ..Default::default()
+                },
+                texture: animated_sprite.texture,
+                atlas: TextureAtlas {
+                    layout: animated_sprite.atlas_layout,
+                    index: animation_indices.first,
+                },
+                transform: Transform {
+                    translation: Vec3 { x: 200.0, y: 200.0, z: 1.0 },
+                    rotation: Quat::default(),
+                    scale: Vec3 { x: SCALE/1.2, y: SCALE/1.2, z: 1.0 },
+                },
+
+                ..Default::default()
+            },
+            SpriteFacing { facing: Facing::RIGHT },
+            animation_indices.clone(),
+            AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        ));
+        // bot_entity.insert(KinematicCharacterController::default());
+        bot_entity.insert(Collider::cuboid(20.0, 20.0));
+        bot_entity.insert(Restitution {coefficient: 0.0, ..Default::default()});
+        // bot_entity.insert(RigidBody::Fixed);
+        bot_entity.insert(Name::new("Bot"));
+        // bot_entity.insert(ActiveEvents::COLLISION_EVENTS);
+    }   
+
+}
+
+fn register_collision_events(
+    mut character_controller_output: Query<&mut KinematicCharacterControllerOutput>,
+){
+    for mut output in &mut character_controller_output {
+        for collisions in &output.collisions {
+            println!("Collision: {:?}", collisions);
+        }
+    }
+}
+
+fn collision_events(
+    mut collision_events: EventReader<CollisionEvent>,
+    mut player_collision: Query<&mut PlayerColliding, With<ControllablePlayer>>,
+    query: Query<&Name>,
+) {
+    let mut velocity = player_collision.single_mut();
+    for event in collision_events.read() {
+        match event {
+            CollisionEvent::Started(entity_1, entity_2, _) => {
+                let name1 = query.get(*entity_1).unwrap();
+                let name2 = query.get(*entity_2).unwrap();
+                println!("Collision started between {:?} and {:?}", name1, name2);
+                velocity.0 = true;
+            },
+            CollisionEvent::Stopped(entity_1, entity_2, _) => {
+                let name1 = query.get(*entity_1).unwrap();
+                let name2 = query.get(*entity_2).unwrap();
+                println!("Collision stopped between {:?} and {:?}", name1, name2);
+                velocity.0 = false;
+            },
+        }
+    }
+}
+
+fn debug_player_velocity(velocity_query: Query<&Velocity, With<ControllablePlayer>>) {
+    for velocity in &velocity_query {
+        println!("Velocity: {:?}", velocity);
+    }
+}
+
+fn update_system(mut controllers: Query<&mut KinematicCharacterController>) {
+    for mut controller in controllers.iter_mut() {
+        controller.translation = Some(Vec2::new(1.0, -0.5));
+    }
 }
 
 fn show_player_animation_state(
@@ -273,13 +363,6 @@ fn player_sprite_follow_mouse(
             }
         }
     }
-}
-
-fn debug_player_velocity(
-    player_velocity_query: Query<&Velocity, With<ControllablePlayer>>
-) {
-    let player_velocity = player_velocity_query.get_single().unwrap();
-    println!("Player velocity is: {:?}", player_velocity.0);
 }
 
 fn label_movement(

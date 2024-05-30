@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use bevy_rapier2d::rapier::dynamics::RigidBody;
 
-use crate::player::{ControllablePlayer, Facing, PlayerAnimationStates, SpriteAnimationStates, SpriteFacing, Velocity};
+use crate::player::{ControllablePlayer, Facing, PlayerAnimationStates, PlayerColliding, SpriteAnimationStates, SpriteFacing, Velocity};
 use crate::{AppState, CursorWorldCoordinates, PlayerCamera, PlayerInput, PlayerPosition};
 
 use crate::magic::{icespike_attack_animation, FireBallSpriteAtlas, IceSpikeSpriteAtlas, SelectedSpell, Spells};
@@ -25,6 +26,7 @@ fn keyboard_input_system(
     mut player_position: ResMut<PlayerPosition>,
     mut player_velocity_query: Query<&mut Velocity, With<ControllablePlayer>>,
     mut animation_state_query: Query<(&mut SpriteAnimationStates, &mut SpriteFacing), With<ControllablePlayer>>,
+    player_collision_query: Query<&PlayerColliding, With<ControllablePlayer>>,
 ) {
     for (mut state, mut facing) in &mut animation_state_query {
         if keyboard_input.just_released(KeyCode::KeyW) {
@@ -70,26 +72,30 @@ fn keyboard_input_system(
         }
     }
 
-    for mut velocity in &mut player_velocity_query {
-        let mut new_velocity = Vec2::ZERO;
-
-        if keyboard_input.pressed(KeyCode::KeyA) {
-            new_velocity.x = -SPEED;
+    // let player_colliding = player_collision_query.single();
+    // if !player_colliding.0 {
+        for mut velocity in &mut player_velocity_query {
+            let mut new_velocity = Vec2::ZERO;
+    
+            if keyboard_input.pressed(KeyCode::KeyA) {
+                new_velocity.x = -SPEED;
+            }
+    
+            if keyboard_input.pressed(KeyCode::KeyD) {
+                new_velocity.x = SPEED;
+            }
+    
+            if keyboard_input.pressed(KeyCode::KeyW) {
+                new_velocity.y = SPEED;
+            }
+    
+            if keyboard_input.pressed(KeyCode::KeyS) {
+                new_velocity.y = -SPEED;
+            }
+            velocity.0 = new_velocity;
         }
-
-        if keyboard_input.pressed(KeyCode::KeyD) {
-            new_velocity.x = SPEED;
-        }
-
-        if keyboard_input.pressed(KeyCode::KeyW) {
-            new_velocity.y = SPEED;
-        }
-
-        if keyboard_input.pressed(KeyCode::KeyS) {
-            new_velocity.y = -SPEED;
-        }
-        velocity.0 = new_velocity;
-    }
+    // }
+    
 }
 
 fn mouse_button_input_system(
