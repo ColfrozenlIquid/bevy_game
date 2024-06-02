@@ -30,7 +30,7 @@ fn main() {
         .add_plugins(LdtkPlugin)
         .add_plugins(GamePlugin)
         .add_plugins(PlayerPlugin)
-        .add_plugins(RapierDebugRenderPlugin::default())
+        // .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         // .add_plugins(NetworkPlugin)
         .add_plugins(LevelPlugin)
@@ -42,7 +42,6 @@ fn main() {
         app.insert_resource(rapier_config);
 
         app.insert_resource(CurrentState::default());
-        app.insert_resource(LevelSelection::index(0));
 
         app.add_systems(Update, debug_current_state);
 

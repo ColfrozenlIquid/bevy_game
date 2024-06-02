@@ -1,6 +1,4 @@
-use std::default;
-
-use bevy::{prelude::*, sprite};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use crate::{game::AnimationTimer, spritesheet::*, AppState, CursorWorldCoordinates, PlayerPosition, SCALE};
 
@@ -67,7 +65,7 @@ pub struct AnimatedSprite {
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGame), setup);
-        app.add_systems(Update, (animate_sprite, update_sprite_facing, move_sprite, player_sprite_follow_mouse, collision_events).run_if(in_state(AppState::InGame)));
+        app.add_systems(Update, (animate_sprite, update_sprite_facing, move_sprite, player_sprite_follow_mouse).run_if(in_state(AppState::InGame)));
         app.add_systems(Update, (update_system).run_if(in_state(AppState::InGame)));
     }
 }
@@ -145,77 +143,79 @@ fn setup(
         changed: false,
     };
 
-    {
-        let mut player_entity = commands.spawn((
-            SpriteSheetBundle {
-                sprite: Sprite {
-                    flip_x: false,
-                    ..Default::default()
-                },
-                texture: animated_sprite.texture.clone(),
-                atlas: TextureAtlas {
-                    layout: animated_sprite.atlas_layout.clone(),
-                    index: animation_indices.first,
-                },
-                transform: Transform {
-                    translation: Vec3 { x: 0.0, y: 0.0, z: 1.0 },
-                    rotation: Quat::default(),
-                    scale: Vec3 { x: SCALE/1.2, y: SCALE/1.2, z: 1.0 },
-                },
-
+    let player_entity = commands.spawn((
+        SpriteSheetBundle {
+            sprite: Sprite {
+                flip_x: false,
                 ..Default::default()
             },
-            SpriteFacing { facing: Facing::RIGHT },
-            animation_indices.clone(),
-            PlayerPosition::default(),
-            PlayerMoving(false),
-            Velocity(Vec2::ZERO),
-            AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+            texture: animated_sprite.texture.clone(),
+            atlas: TextureAtlas {
+                layout: animated_sprite.atlas_layout.clone(),
+                index: animation_indices.first,
+            },
+            transform: Transform {
+                translation: Vec3 { x: 1400.0, y: 1600.0, z: 5.0 },
+                rotation: Quat::default(),
+                scale: Vec3 { x: SCALE/1.2, y: SCALE/1.2, z: 1.0 },
+            },
+
+            ..Default::default()
+        },
+        SpriteFacing { facing: Facing::RIGHT },
+        animation_indices.clone(),
+        PlayerPosition::default(),
+        PlayerMoving(false),
+        Velocity(Vec2::ZERO),
+        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        ControllablePlayer,
+        sprite_animation_states,
+        RigidBody::KinematicPositionBased,
+        Name::new("Player"),
+        LockedAxes::ROTATION_LOCKED,
+        PlayerColliding(false),
+    )).id();
+
+    commands.entity(player_entity).with_children(|parent| {
+        parent.spawn((
+            TransformBundle::from(Transform { translation: Vec3::new(0.0, -9.0, 0.0), ..Default::default()}),
+            Collider::cuboid(8.0, 5.0),
+            KinematicCharacterController::default(),
+            ActiveEvents::COLLISION_EVENTS,
         ));
-        player_entity.insert(ControllablePlayer);
-        player_entity.insert(sprite_animation_states);
-        // player_entity.insert(KinematicCharacterController::default());
-        player_entity.insert(Collider::cuboid(10.0, 10.0));
-        player_entity.insert(RigidBody::Dynamic);
-        player_entity.insert(Name::new("Player"));
-        player_entity.insert(ActiveEvents::COLLISION_EVENTS);
-        player_entity.insert(LockedAxes::ROTATION_LOCKED);
-        player_entity.insert(KinematicCharacterController::default());
-        player_entity.insert(PlayerColliding(false));
-        // player_entity.insert(rigid_body);
-        // player_entity.insert(animation_state);
+    });
 
-        let mut bot_entity = commands.spawn((
-            SpriteSheetBundle {
-                sprite: Sprite {
-                    flip_x: false,
-                    ..Default::default()
-                },
-                texture: animated_sprite.texture,
-                atlas: TextureAtlas {
-                    layout: animated_sprite.atlas_layout,
-                    index: animation_indices.first,
-                },
-                transform: Transform {
-                    translation: Vec3 { x: 200.0, y: 200.0, z: 1.0 },
-                    rotation: Quat::default(),
-                    scale: Vec3 { x: SCALE/1.2, y: SCALE/1.2, z: 1.0 },
-                },
-
+    let bot_entity = commands.spawn((
+        SpriteSheetBundle {
+            sprite: Sprite {
+                flip_x: false,
                 ..Default::default()
             },
-            SpriteFacing { facing: Facing::RIGHT },
-            animation_indices.clone(),
-            AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-        ));
-        // bot_entity.insert(KinematicCharacterController::default());
-        bot_entity.insert(Collider::cuboid(20.0, 20.0));
-        bot_entity.insert(Restitution {coefficient: 0.0, ..Default::default()});
-        // bot_entity.insert(RigidBody::Fixed);
-        bot_entity.insert(Name::new("Bot"));
-        // bot_entity.insert(ActiveEvents::COLLISION_EVENTS);
-    }   
+            texture: animated_sprite.texture,
+            atlas: TextureAtlas {
+                layout: animated_sprite.atlas_layout,
+                index: animation_indices.first,
+            },
+            transform: Transform {
+                translation: Vec3 { x: 200.0, y: 200.0, z: 1.0 },
+                rotation: Quat::default(),
+                scale: Vec3 { x: SCALE/1.2, y: SCALE/1.2, z: 1.0 },
+            },
+            ..Default::default()
+        },
+        SpriteFacing { facing: Facing::RIGHT },
+        animation_indices.clone(),
+        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        Name::new("Bot"),
+    )).id();
 
+    commands.entity(bot_entity).with_children(|parent| {
+        parent.spawn((
+            TransformBundle::from(Transform { translation: Vec3::new(0.0, -4.0, 0.0), ..Default::default()}),
+            Collider::cuboid(10.0, 10.0),
+            ActiveEvents::COLLISION_EVENTS,
+        ));
+    });
 }
 
 fn register_collision_events(
@@ -224,30 +224,6 @@ fn register_collision_events(
     for mut output in &mut character_controller_output {
         for collisions in &output.collisions {
             println!("Collision: {:?}", collisions);
-        }
-    }
-}
-
-fn collision_events(
-    mut collision_events: EventReader<CollisionEvent>,
-    mut player_collision: Query<&mut PlayerColliding, With<ControllablePlayer>>,
-    query: Query<&Name>,
-) {
-    let mut velocity = player_collision.single_mut();
-    for event in collision_events.read() {
-        match event {
-            CollisionEvent::Started(entity_1, entity_2, _) => {
-                let name1 = query.get(*entity_1).unwrap();
-                let name2 = query.get(*entity_2).unwrap();
-                println!("Collision started between {:?} and {:?}", name1, name2);
-                velocity.0 = true;
-            },
-            CollisionEvent::Stopped(entity_1, entity_2, _) => {
-                let name1 = query.get(*entity_1).unwrap();
-                let name2 = query.get(*entity_2).unwrap();
-                println!("Collision stopped between {:?} and {:?}", name1, name2);
-                velocity.0 = false;
-            },
         }
     }
 }
@@ -342,23 +318,23 @@ fn move_sprite(
     time: Res<Time>,
     mut sprite_query: Query<(&Velocity, &mut Transform, &mut PlayerPosition), With<ControllablePlayer>>,
 ) {
-    for (velocity, mut transform, mut player_position) in &mut sprite_query {
-        player_position.transform += Vec3::new(velocity.0.x, velocity.0.y, 0.0) * time.delta_seconds();
-        player_position.transform.z = 1.0;
-        transform.translation = player_position.transform;
-    }
+    // for (velocity, mut transform, mut player_position) in &mut sprite_query {
+    //     player_position.transform += Vec3::new(velocity.0.x, velocity.0.y, 0.0) * time.delta_seconds();
+    //     player_position.transform.z = 1.0;
+    //     transform.translation = player_position.transform;
+    // }
 }
 
 fn player_sprite_follow_mouse(
-    mut player_moving_query: Query<(&PlayerMoving, &mut Sprite, &PlayerPosition), With<ControllablePlayer>>,
+    mut player_moving_query: Query<(&PlayerMoving, &mut Sprite, &Transform), With<ControllablePlayer>>,
     cursor_coordinate: Res<CursorWorldCoordinates>,
 ) {
     for (player_moving, mut sprite, player_position) in &mut player_moving_query {
         if !player_moving.0 {
-            if cursor_coordinate.0.x >= player_position.transform.x {
+            if cursor_coordinate.0.x >= player_position.translation.x {
                 sprite.flip_x = false;
             }
-            if cursor_coordinate.0.x < player_position.transform.x {
+            if cursor_coordinate.0.x < player_position.translation.x {
                 sprite.flip_x = true;
             }
         }

@@ -1,6 +1,7 @@
 use crate::{CursorWorldCoordinates, PlayerCamera};
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use bevy_rapier2d::prelude::*;
 use std::f32::consts::PI;
 use std::time::Duration;
 
@@ -21,6 +22,9 @@ struct AnimationIndices {
 
 #[derive(Component, Deref, DerefMut)]
 struct AnimationTimer(Timer);
+
+#[derive(Component)]
+struct SpellColliding(bool);
 
 #[derive(Component)]
 struct CastSpell {
@@ -92,13 +96,14 @@ impl Plugin for MagicPlugin {
         app.add_systems(Startup, setup);
         app.add_systems(Update, (
             despawn_spells,
-            spell_flight_system,
+            // spell_flight_system,
             select_spell_system,
             enable_spell_cooldown,
             cursor_system,
             despawn_fireball_spell_collision,
             despawn_icespike_spell_collision,
             animate_sprite,
+            spell_collision_events
         ));
 
         app.insert_resource(FireBallSpriteAtlas::default());
@@ -214,12 +219,12 @@ fn despawn_spells(
             if cast_spell.spell_type == Spells::FireBall {
                 println!("despawn spell fireball");
                 spawn_fireball_spell_collision(&mut commands, &fireburst_sprite, &transform, &impact_position);
-                commands.entity(entity).despawn();
+                commands.entity(entity).despawn_recursive();
             }
             else if cast_spell.spell_type == Spells::IceSpike {
                 println!("despawn spell icespike");
                 spawn_icespike_spell_collision(&mut commands, &icespikeshatter_sprite, &transform, &impact_position);
-                commands.entity(entity).despawn();
+                commands.entity(entity).despawn_recursive();
             }
         }
     }
@@ -243,7 +248,7 @@ fn spawn_fireball_spell_collision(
                 index: animation_indices.first,
             },
             transform: Transform {
-                translation: Vec3::new(spell_impact_position.x, spell_impact_position.y, 1.0),
+                translation: Vec3::new(spell_impact_position.x, spell_impact_position.y, 5.0),
                 scale: Vec3::new(-SCALE/2.0, SCALE/2.0, 1.0),
                 rotation: sprite_quat,
                 ..Default::default()
@@ -274,7 +279,7 @@ fn spawn_icespike_spell_collision(
                 index: animation_indices.first,
             },
             transform: Transform {
-                translation: Vec3::new(spell_impact_position.x, spell_impact_position.y, 1.0),
+                translation: Vec3::new(spell_impact_position.x, spell_impact_position.y, 5.0),
                 scale: Vec3::new(-SCALE/2.0, SCALE/2.0, 1.0),
                 rotation: sprite_quat,
                 ..Default::default()
@@ -293,7 +298,7 @@ fn despawn_fireball_spell_collision(
 ) {
     for (entity, sprite) in entity_query.iter() {
         if sprite.index == 28 {
-            commands.entity(entity).despawn();
+            commands.entity(entity).despawn_recursive();
         }
     }
 }
@@ -304,12 +309,12 @@ fn despawn_icespike_spell_collision(
 ) {
     for (entity, sprite) in entity_query.iter() {
         if sprite.index == 48 {
-            commands.entity(entity).despawn();
+            commands.entity(entity).despawn_recursive();
         }
     }
 }
 
-pub fn icespike_attack_animation(
+pub fn spawn_icespike_attack(
     commands: &mut Commands,
     magic_sprite: &Res<IceSpikeSpriteAtlas>,
     cursor_coord: &Res<CursorWorldCoordinates>,
@@ -322,7 +327,7 @@ pub fn icespike_attack_animation(
     let sprite_spawn_position = position_player.truncate() + (direction_vector_normalized * 65.0);
     let angle = direction_vector_normalized.angle_between(Vec2 { x: 1.0, y: 0.0 });
 
-    commands.spawn((
+    let spell_entity = commands.spawn((
         SpriteSheetBundle {
             texture: magic_sprite.image.clone(),
             atlas: TextureAtlas {
@@ -347,10 +352,25 @@ pub fn icespike_attack_animation(
         SpellFlightTime {timer: Timer::new(Duration::from_secs(1), TimerMode::Once)},
         animation_indices.clone(),
         AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
-    ));
+        ActiveEvents::COLLISION_EVENTS,
+        Name::new("Ice Spike"),
+        SpellColliding(false),
+    )).id();
+
+    commands.entity(spell_entity).with_children(|parent| {
+        parent.spawn((
+            TransformBundle::from(Transform { translation: Vec3::new(26.0, 0.0, 0.0), ..Default::default()}),
+            RigidBody::Dynamic,
+            Collider::ball(5.0),
+        )).insert(Velocity {
+            linvel: direction_vector_normalized,
+            angvel: 0.4
+        });
+    });
+
 }
 
-pub fn fireball_attack_animation(
+pub fn spawn_fireball_attack(
     commands: &mut Commands,
     magic_sprite: &Res<FireBallSpriteAtlas>,
     cursor_coord: &Res<CursorWorldCoordinates>,
@@ -363,7 +383,7 @@ pub fn fireball_attack_animation(
     let sprite_spawn_position = position_player.truncate() + (direction_vector_normalized * 65.0);
     let angle = direction_vector_normalized.angle_between(Vec2 { x: 1.0, y: 0.0 });
 
-    commands.spawn((
+    let spell_entity = commands.spawn((
         SpriteSheetBundle {
             texture: magic_sprite.image.clone(),
             atlas: TextureAtlas {
@@ -371,7 +391,7 @@ pub fn fireball_attack_animation(
                 index: animation_indices.first,
             },
             transform: Transform {
-                translation: Vec3::new(sprite_spawn_position.x, sprite_spawn_position.y, 1.0),
+                translation: Vec3::new(sprite_spawn_position.x, sprite_spawn_position.y, 5.0),
                 scale: Vec3::new(-SCALE/2.0, SCALE/2.0, 1.0),
                 rotation: Quat::from_rotation_z(-angle + PI),
                 ..Default::default()
@@ -388,8 +408,53 @@ pub fn fireball_attack_animation(
         SpellFlightTime {timer: Timer::new(Duration::from_secs(1), TimerMode::Once)},
         animation_indices.clone(),
         AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
-    ));
+        ActiveEvents::COLLISION_EVENTS,
+        LockedAxes::ROTATION_LOCKED,
+        Name::new("FireBall"),
+        SpellColliding(false),
+        // (
+            RigidBody::Dynamic,
+            Collider::ball(5.0),
+            // TransformBundle::from(Transform { translation: Vec3::new(26.0, 0.0, 0.0), ..Default::default()}),
+        // ),
+        Velocity {
+            linvel: direction_vector_normalized * 300.0,
+            angvel: 0.0
+        },
+    )).id();
+
+    // commands.entity(spell_entity).with_children(|parent| {
+    //     parent.spawn((
+    //         // TransformBundle::from(Transform { translation: Vec3::new(26.0, 0.0, 0.0), ..Default::default()}),
+    //         RigidBody::Dynamic,
+    //         Collider::ball(5.0),
+    //     )).insert(Velocity {
+    //         linvel: direction_vector_normalized * 300.0,
+    //         angvel: 0.0
+    //     });
+    // });
 }
+
+// fn spell_collision_events(
+//     mut collision_events: EventReader<CollisionEvent>,
+//     query: Query<&Name>,
+// ) {
+//     for event in collision_events.read() {
+//         println!("Collision event detected: {:?}", event);
+//         match event {
+//             CollisionEvent::Started(entity_1, entity_2, _) => {
+//                 let name1 = query.get(*entity_1);
+//                 let name2 = query.get(*entity_2);
+//                 println!("Collision started between {:?} and {:?}", name1, name2);
+//             },
+//             CollisionEvent::Stopped(entity_1, entity_2, _) => {
+//                 let name1 = query.get(*entity_1);
+//                 let name2 = query.get(*entity_2);
+//                 println!("Collision stopped between {:?} and {:?}", name1, name2);
+//             },
+//         }
+//     }
+// }
 
 fn spell_flight_system(
     time: Res<Time>,
@@ -407,4 +472,25 @@ fn enable_spell_cooldown(
     time: Res<Time>,
 ) {
     spell_cooldown.timer.tick(time.delta());
+}
+
+fn spell_collision_events(
+    mut collision_events: EventReader<CollisionEvent>,
+    mut commands: Commands,
+    query: Query<&Name>,
+) {
+    for event in collision_events.read() {
+        println!("Collision event detected: {:?}", event);
+        match event {
+            CollisionEvent::Started(mut entity_1, entity_2, _) => {
+                generate_spell_collision(&mut entity_1, &mut commands);
+            },
+            CollisionEvent::Stopped(entity_1, entity_2, _) => {},
+        }
+    }
+}
+
+fn generate_spell_collision(entity: &mut Entity, commands: &mut Commands) {
+    println!("Spell Collision should be handled here on spell: {:?}", entity);
+    let spell = commands.entity(*entity).id();
 }

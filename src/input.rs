@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use bevy_rapier2d::control::KinematicCharacterController;
 use bevy_rapier2d::rapier::dynamics::RigidBody;
 
 use crate::player::{ControllablePlayer, Facing, PlayerAnimationStates, PlayerColliding, SpriteAnimationStates, SpriteFacing, Velocity};
 use crate::{AppState, CursorWorldCoordinates, PlayerCamera, PlayerInput, PlayerPosition};
 
-use crate::magic::{icespike_attack_animation, FireBallSpriteAtlas, IceSpikeSpriteAtlas, SelectedSpell, Spells};
-use crate::magic::fireball_attack_animation;
+use crate::magic::{spawn_icespike_attack, FireBallSpriteAtlas, IceSpikeSpriteAtlas, SelectedSpell, Spells};
+use crate::magic::spawn_fireball_attack;
 
 pub const SPEED: f32 = 200.0;
 
@@ -21,12 +22,14 @@ impl Plugin for InputPlugin {
 }
 
 fn keyboard_input_system(
+    time: Res<Time>,
     keyboard_input: Res<ButtonInput<KeyCode>>, 
     mut player_input: ResMut<PlayerInput>,
     mut player_position: ResMut<PlayerPosition>,
     mut player_velocity_query: Query<&mut Velocity, With<ControllablePlayer>>,
     mut animation_state_query: Query<(&mut SpriteAnimationStates, &mut SpriteFacing), With<ControllablePlayer>>,
     player_collision_query: Query<&PlayerColliding, With<ControllablePlayer>>,
+    mut kinematiccontroller_query: Query<&mut KinematicCharacterController>,
 ) {
     for (mut state, mut facing) in &mut animation_state_query {
         if keyboard_input.just_released(KeyCode::KeyW) {
@@ -72,28 +75,30 @@ fn keyboard_input_system(
         }
     }
 
+    let mut player = kinematiccontroller_query.single_mut();
+
     // let player_colliding = player_collision_query.single();
     // if !player_colliding.0 {
-        for mut velocity in &mut player_velocity_query {
+        // for mut velocity in &mut player_velocity_query {
             let mut new_velocity = Vec2::ZERO;
     
             if keyboard_input.pressed(KeyCode::KeyA) {
-                new_velocity.x = -SPEED;
+                new_velocity.x = -SPEED * time.delta_seconds();
             }
     
             if keyboard_input.pressed(KeyCode::KeyD) {
-                new_velocity.x = SPEED;
+                new_velocity.x = SPEED * time.delta_seconds();
             }
     
             if keyboard_input.pressed(KeyCode::KeyW) {
-                new_velocity.y = SPEED;
+                new_velocity.y = SPEED * time.delta_seconds();
             }
     
             if keyboard_input.pressed(KeyCode::KeyS) {
-                new_velocity.y = -SPEED;
+                new_velocity.y = -SPEED * time.delta_seconds();
             }
-            velocity.0 = new_velocity;
-        }
+            player.translation = Some(new_velocity);
+        // }
     // }
     
 }
@@ -120,10 +125,10 @@ fn mouse_button_input_system(
                 println!("Pressed left mouse button");
                 println!("Cursor position is: {},{}", world_position.x, world_position.y);
                 if selected_spell.spell == Spells::FireBall {
-                    fireball_attack_animation(&mut commands, &fireball_sprite, &cursor_coord, &camera_transform.translation());
+                    spawn_fireball_attack(&mut commands, &fireball_sprite, &cursor_coord, &camera_transform.translation());
                 }
                 if selected_spell.spell == Spells::IceSpike {
-                    icespike_attack_animation(&mut commands, &icespike_sprite, &cursor_coord, &camera_transform.translation())
+                    spawn_icespike_attack(&mut commands, &icespike_sprite, &cursor_coord, &camera_transform.translation())
                 }
         }
     }    

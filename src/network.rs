@@ -135,6 +135,8 @@ fn client_sync_players(
 ) {
     let animation_indices = AnimationIndices {first: 0, last: 3};
     let client_id = client_id.0;
+
+
     while let Some(message) = client.receive_message(ServerChannel::ServerMessages) {
         let server_message = bincode::deserialize(&message).unwrap();
         match server_message {
