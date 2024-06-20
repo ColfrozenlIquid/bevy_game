@@ -11,7 +11,7 @@ pub mod menu {
     use bevy::{app::AppExit, prelude::*};
     use super::{despawn_screen, AppState};
 
-    const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
+    pub const FONT_PATH: &str = ".\\fonts\\Retro Gaming.ttf";
     // const MENU_MUSIC: &str = ".\\music\\menu_music.ogg";
     const CHARACTER_SPRITE_PATH: &str = ".\\sprites\\animated_characters_600.png";
     const UI_SPRITE_PATH: &str = ".\\sprites\\arrow_sprite_200.png";
@@ -374,37 +374,31 @@ pub mod menu {
                             },
                             ..Default::default()
                         },
-                        CharacterSelectorButton::Previous,
                     )).with_children(|parent| {
-                        parent.spawn(
-                            SpriteSheetBundle {
-                                texture: ui_sprites.image.clone(),
-                                atlas: TextureAtlas{
-                                    layout: ui_sprites.layout.clone(),
-                                    index: animation_indices.first,
+                        parent.spawn((
+                            AtlasImageBundle {
+                                style: Style {
+                                    width: Val::Px(30.0),
+                                    height: Val::Px(30.0),
+                                    ..Default::default()
                                 },
-                                // texture_atlas: ui_sprites.handle.clone(),
-                                // texture_atlas_image: UiTextureAtlasImage {
-                                //     index: 0,
-                                //     ..Default::default()
-                                // },
+                                texture_atlas: ui_sprites.layout.clone().into(),
+                                image: ui_sprites.image.clone().into(),
                                 ..Default::default()
-                            }
-                        );
+                            },
+                            CharacterSelectorButton::Previous,
+                        ));
                     });
 
                     parent.spawn((
-                        SpriteSheetBundle {
-                            texture: character_sprites.image.clone(),
-                            atlas: TextureAtlas {
-                                layout: character_sprites.layout.clone(),
-                                index: animation_indices.first,
+                        AtlasImageBundle {
+                            style: Style {
+                                width: Val::Px(150.0),
+                                height: Val::Px(150.0),
+                                ..Default::default()
                             },
-                            // texture_atlas: character_sprites.handle.clone(),
-                            // texture_atlas_image: UiTextureAtlasImage {
-                            //     index: animation_indices.first,
-                            //     ..Default::default()
-                            // },
+                            texture_atlas: character_sprites.layout.clone().into(),
+                            image: character_sprites.image.clone().into(),
                             ..Default::default()
                         },
                         animation_indices.clone(),
@@ -423,22 +417,19 @@ pub mod menu {
                         },
                         CharacterSelectorButton::Next,
                     )).with_children(|parent| {
-                        parent.spawn(
-                            SpriteSheetBundle {
-                                texture: ui_sprites.image.clone(),
-                                atlas: TextureAtlas {
-                                    layout: ui_sprites.layout.clone(),
-                                    index: animation_indices.first,
+                        parent.spawn((
+                            AtlasImageBundle {
+                                style: Style {
+                                    width: Val::Px(30.0),
+                                    height: Val::Px(30.0),
+                                    ..Default::default()
                                 },
-                                // texture_atlas: ui_sprites.handle.clone(),
-                                // texture_atlas_image: UiTextureAtlasImage {
-                                //     index: 0,
-                                //     flip_x: true,
-                                //     ..Default::default()
-                                // },
+                                texture_atlas: ui_sprites.layout.clone().into(),
+                                image: ui_sprites.image.clone().into(),
                                 ..Default::default()
-                            }
-                        );
+                            },
+                            CharacterSelectorButton::Next,
+                        ));
                     });
                 });
             });

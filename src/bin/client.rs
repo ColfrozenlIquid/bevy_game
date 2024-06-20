@@ -1,16 +1,20 @@
+use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::{LdtkPlugin, LevelSelection};
 use bevy_game_client::cursor::CursorPlugin;
 use bevy_game_client::game::GamePlugin;
+use bevy_game_client::healthbar::HealthBarPlugin;
 use bevy_game_client::input::InputPlugin;
 use bevy_game_client::level::LevelPlugin;
 use bevy_game_client::magic::MagicPlugin;
 use bevy_game_client::mainmenu::menu::MenuPlugin;
+use bevy_game_client::melee::MeleePlugin;
 use bevy_game_client::player::PlayerPlugin;
 use bevy_game_client::splashscreen::splash::SplashPlugin;
 use bevy_game_client::spritesheet::SpriteSheetPlugin;
 use bevy_game_client::AppState;
 use bevy_game_client::debug::DebugPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rapier2d::plugin::{NoUserData, RapierConfiguration, RapierPhysicsPlugin};
 use bevy_rapier2d::render::RapierDebugRenderPlugin;
 
@@ -30,10 +34,12 @@ fn main() {
         .add_plugins(LdtkPlugin)
         .add_plugins(GamePlugin)
         .add_plugins(PlayerPlugin)
-        // .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(HealthBarPlugin)
+        .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         // .add_plugins(NetworkPlugin)
         .add_plugins(LevelPlugin)
+        .add_plugins(MeleePlugin)
         .add_plugins(SpriteSheetPlugin)
         .init_state::<AppState>();
 

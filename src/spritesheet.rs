@@ -20,6 +20,8 @@ pub const LIZARD_M_IDLE: &str = "lizard_m_idle_anim";
 pub const LIZARD_M_RUN: &str = "lizard_m_run_anim";
 pub const LIZARD_M_HIT: &str = "lizard_m_hit_anim";
 
+pub const WEAPON_SWORD: &str = "weapon_knight_sword.png";
+
 pub const SLUG_ANIM: &str = "slug_anim";
 
 pub struct SpriteSheetPlugin;

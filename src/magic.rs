@@ -412,11 +412,11 @@ pub fn spawn_fireball_attack(
         LockedAxes::ROTATION_LOCKED,
         Name::new("FireBall"),
         SpellColliding(false),
-        // (
+        (
             RigidBody::Dynamic,
             Collider::ball(5.0),
             // TransformBundle::from(Transform { translation: Vec3::new(26.0, 0.0, 0.0), ..Default::default()}),
-        // ),
+        ),
         Velocity {
             linvel: direction_vector_normalized * 300.0,
             angvel: 0.0
@@ -425,7 +425,7 @@ pub fn spawn_fireball_attack(
 
     // commands.entity(spell_entity).with_children(|parent| {
     //     parent.spawn((
-    //         // TransformBundle::from(Transform { translation: Vec3::new(26.0, 0.0, 0.0), ..Default::default()}),
+    //         TransformBundle::from(Transform { translation: Vec3::new(26.0, 0.0, 0.0), ..Default::default()}),
     //         RigidBody::Dynamic,
     //         Collider::ball(5.0),
     //     )).insert(Velocity {
@@ -482,8 +482,9 @@ fn spell_collision_events(
     for event in collision_events.read() {
         println!("Collision event detected: {:?}", event);
         match event {
-            CollisionEvent::Started(mut entity_1, entity_2, _) => {
-                generate_spell_collision(&mut entity_1, &mut commands);
+            CollisionEvent::Started(mut entity_1, mut entity_2, _) => {
+                commands.entity(entity_2).despawn_recursive();
+                // generate_spell_collision(&mut entity_1, &mut commands);
             },
             CollisionEvent::Stopped(entity_1, entity_2, _) => {},
         }

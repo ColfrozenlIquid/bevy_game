@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use crate::{game::AnimationTimer, spritesheet::*, AppState, CursorWorldCoordinates, PlayerPosition, SCALE};
+use crate::{game::{AnimationTimer, Equipment}, spritesheet::*, AppState, CursorWorldCoordinates, PlayerPosition, SCALE};
 
 pub struct PlayerPlugin;
 
@@ -69,6 +69,7 @@ impl Plugin for PlayerPlugin {
         app.add_systems(Update, (update_system).run_if(in_state(AppState::InGame)));
     }
 }
+
 
 fn setup(
     mut commands: Commands,
