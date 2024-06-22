@@ -12,6 +12,7 @@ pub mod game;
 pub mod network;
 pub mod player;
 pub mod healthbar;
+pub mod enemy;
 
 use std::time::Duration;
 use bevy::{

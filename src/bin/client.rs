@@ -2,6 +2,7 @@ use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::{LdtkPlugin, LevelSelection};
 use bevy_game_client::cursor::CursorPlugin;
+use bevy_game_client::enemy::EnemyPlugin;
 use bevy_game_client::game::GamePlugin;
 use bevy_game_client::healthbar::HealthBarPlugin;
 use bevy_game_client::input::InputPlugin;
@@ -35,6 +36,7 @@ fn main() {
         .add_plugins(GamePlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(HealthBarPlugin)
+        .add_plugins(EnemyPlugin)
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         // .add_plugins(NetworkPlugin)

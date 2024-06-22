@@ -38,31 +38,84 @@ impl SwordSwing {
     }
 }
 
+// fn update_swing(
+//     time: Res<Time>,
+//     mut query: Query<(&mut SwordSwing, &mut Transform)>,
+// ) {
+//     for (mut swing, mut transform) in query.iter_mut() {
+//         if swing.swinging {
+//             swing.timer.tick(time.delta());
+//             let progress = swing.timer.fraction();
+            
+//             // Offset the rotation center (assuming center of the sprite is adjusted)
+//             let offset_translation = Vec3::new(0.0, 100.0, 0.0); // Example offset
+
+//             // Calculate the target rotation
+//             let target_rotation = Quat::from_rotation_z(swing.start_rotation + progress * (swing.end_rotation - swing.start_rotation));
+
+//             // Apply the offset translation to the transform
+//             transform.translation += offset_translation;
+
+//             // Apply the rotation around the offset center
+//             transform.rotation = Quat::from_rotation_z(swing.start_rotation) * target_rotation; // Initial rotation
+//                                 //  * target_rotation // Animated rotation
+
+//             // Reverse the offset translation
+//             transform.translation -= offset_translation;
+
+//             if swing.timer.finished() {
+//                 swing.swinging = false;
+//             }
+//         }
+//     }
+// }
+
 fn update_swing(
     time: Res<Time>,
     mut query: Query<(&mut SwordSwing, &mut Transform)>,
 ) {
-    for (mut swing, mut transform) in &mut query {
+    for (mut swing, mut transform) in query.iter_mut() {
         if swing.swinging {
             swing.timer.tick(time.delta());
-            let progress = 1.0 - swing.timer.fraction_remaining();
-            transform.rotation = Quat::from_rotation_z(swing.start_rotation + progress * (swing.end_rotation - swing.start_rotation));
-        }
-        if swing.timer.finished() {
-            swing.swinging = false;
+            let progress = swing.timer.fraction();
+            let current_rotation = transform.rotation;
+            let target_rotation = Quat::from_rotation_z(swing.start_rotation + progress * (swing.end_rotation - swing.start_rotation));
+            transform.rotation = current_rotation.slerp(target_rotation, 0.5); // Adjust the slerp factor as needed
+
+            if swing.timer.finished() {
+                swing.swinging = false;
+            }
         }
     }
 }
 
+// fn update_swing(
+//     time: Res<Time>,
+//     mut query: Query<(&mut SwordSwing, &mut Transform)>,
+// ) {
+//     for (mut swing, mut transform) in &mut query {
+//         if swing.swinging {
+//             swing.timer.tick(time.delta());
+//             let progress = 1.0 - swing.timer.fraction_remaining();
+//             transform.rotation = transform.rotation + Quat::from_rotation_z(swing.start_rotation + progress * (swing.end_rotation - swing.start_rotation));
+//         }
+//         if swing.timer.finished() {
+//             swing.swinging = false;
+//         }
+//     }
+// }
+
 fn sword_swing(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut SwordSwing, &mut Transform)>,
+
 ) {
     for (mut swing, mut transform) in &mut query {
         if keyboard_input.just_pressed(KeyCode::Space) && !swing.swinging {
             println!("Started swing");
             swing.swinging = true;
             swing.timer.reset();
+            swing.start_rotation = transform.rotation.z;
             transform.rotation = Quat::from_rotation_z(swing.start_rotation);
         }
     }
@@ -99,7 +152,7 @@ fn setup(
                 index: 0,
             },
             transform: Transform {
-                translation: Vec3 { x: 1400.0, y: 1600.0, z: 5.0 },
+                translation: Vec3 { x: 1400.0, y: 1600.0, z: 6.0 },
                 rotation: Quat::default(),
                 scale: Vec3 { x: SCALE/1.6, y: SCALE/1.6, z: 1.0 },
             },
@@ -108,7 +161,7 @@ fn setup(
         Name::new("Sword"),
         Equipment,
         SwordState::IDLE,
-        SwordSwing::new(2.0, 0.0, PI/2.0),
+        SwordSwing::new(0.2, 0.0, PI/2.0),
     ));
 }
 
@@ -142,29 +195,31 @@ fn sword_stab_animation() {
 // }
 
 fn sword_follow_cursor(
-    mut sword_transform: Query<&mut Transform, With<Equipment>>,
+    mut sword_transform: Query<(&mut Transform, &mut SwordSwing), With<Equipment>>,
     player_transform: Query<&Transform, (With<ControllablePlayer>, Without<Equipment>)>,
     cursor_position: Res<CursorWorldCoordinates>,
 ) {
     let distance_from_player: f32 = 60.0;
-    for mut sword_translation in sword_transform.iter_mut() {
-        if let Ok(player_translation) = player_transform.get_single() {
-            let direction_vector_normalized = (cursor_position.0.truncate() - player_translation.translation.truncate()).normalize();
-            sword_translation.translation.x = player_translation.translation.x + (direction_vector_normalized.x * distance_from_player);
-            sword_translation.translation.y = player_translation.translation.y + (direction_vector_normalized.y * distance_from_player);
-            let angle = direction_vector_normalized.angle_between(Vec2 { x: 1.0, y: 0.0 });
-
-            if angle <= 0.0 && angle >= -PI/2.0 {
-                sword_translation.rotation = Quat::from_rotation_z(-angle);
-            }
-            if angle <= -PI/2.0 && angle >= -PI {
-                sword_translation.rotation = Quat::from_rotation_z(-angle + PI);
-            }
-            if angle > 0.0 && angle <= PI/2.0 {
-                sword_translation.rotation = Quat::from_rotation_z(-angle);
-            }
-            if angle > PI/2.0 && angle <= PI {
-                sword_translation.rotation = Quat::from_rotation_z(-angle + PI);
+    for (mut sword_translation, swing) in sword_transform.iter_mut() {
+        if !swing.swinging {
+            if let Ok(player_translation) = player_transform.get_single() {
+                let direction_vector_normalized = (cursor_position.0.truncate() - player_translation.translation.truncate()).normalize();
+                sword_translation.translation.x = player_translation.translation.x + (direction_vector_normalized.x * distance_from_player);
+                sword_translation.translation.y = player_translation.translation.y + (direction_vector_normalized.y * distance_from_player);
+                let angle = direction_vector_normalized.angle_between(Vec2 { x: 1.0, y: 0.0 });
+    
+                if angle <= 0.0 && angle >= -PI/2.0 {
+                    sword_translation.rotation = Quat::from_rotation_z(-angle - PI/4.0);
+                }
+                if angle <= -PI/2.0 && angle >= -PI {
+                    sword_translation.rotation = Quat::from_rotation_z(-angle + PI + PI/4.0);
+                }
+                if angle > 0.0 && angle <= PI/2.0 {
+                    sword_translation.rotation = Quat::from_rotation_z(-angle - PI/4.0);
+                }
+                if angle > PI/2.0 && angle <= PI {
+                    sword_translation.rotation = Quat::from_rotation_z(-angle + PI + PI/4.0);
+                }
             }
         }
     }

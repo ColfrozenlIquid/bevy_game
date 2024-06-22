@@ -3,7 +3,7 @@ use std::io::Read;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::{player::{PlayerAnimationStates, PlayerSpriteAtlas}, AppState, PLAYER_SPRITE_PATH};
+use crate::{enemy::EnemyAnimationStates, player::{PlayerAnimationStates, PlayerSpriteAtlas}, AppState, PLAYER_SPRITE_PATH};
 
 const SPRITE_ATLAS_PATH: &str = "./assets/spritesheets/sprite_atlas.json";
 const SPRITE_PATH: &str = "./assets/spritesheets/sprites.json";
@@ -23,6 +23,9 @@ pub const LIZARD_M_HIT: &str = "lizard_m_hit_anim";
 pub const WEAPON_SWORD: &str = "weapon_knight_sword.png";
 
 pub const SLUG_ANIM: &str = "slug_anim";
+
+pub const CHORT_IDLE: &str = "chort_idle_anim";
+pub const CHORT_RUN: &str = "chort_run_anim";
 
 pub struct SpriteSheetPlugin;
 
@@ -202,11 +205,29 @@ pub fn get_sprite_atlas_layout(
     None
 }
 
-pub fn get_sprite_animation_states(
+pub fn get_player_sprite_animation_states(
     requested_state: PlayerAnimationStates,
     requested_sprite: String, 
     sprite_collection: &SpriteCollection,
 ) -> (PlayerAnimationStates, Vec<usize>) {
+    let mut indices = Vec::<usize>::new();
+
+    for sprite in &sprite_collection.sprites {
+        if sprite.name == requested_sprite {
+            for (_name, index) in &sprite.frame_index {
+                indices.push(*index as usize);
+            }
+        }
+    }
+
+    return (requested_state, indices);
+}
+
+pub fn get_enemy_sprite_animation_states(
+    requested_state: EnemyAnimationStates,
+    requested_sprite: String, 
+    sprite_collection: &SpriteCollection,
+) -> (EnemyAnimationStates, Vec<usize>) {
     let mut indices = Vec::<usize>::new();
 
     for sprite in &sprite_collection.sprites {

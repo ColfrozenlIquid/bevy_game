@@ -3,7 +3,7 @@ use bevy::window::PrimaryWindow;
 use bevy_rapier2d::control::KinematicCharacterController;
 use bevy_rapier2d::rapier::dynamics::RigidBody;
 
-use crate::player::{ControllablePlayer, Facing, PlayerAnimationStates, PlayerColliding, SpriteAnimationStates, SpriteFacing, Velocity};
+use crate::player::{ControllablePlayer, Facing, PlayerAnimationStates, PlayerColliding, PlayerSpriteAnimationStates, SpriteFacing, Velocity};
 use crate::{AppState, CursorWorldCoordinates, PlayerCamera, PlayerInput, PlayerPosition};
 
 use crate::magic::{spawn_icespike_attack, FireBallSpriteAtlas, IceSpikeSpriteAtlas, SelectedSpell, Spells};
@@ -27,7 +27,7 @@ fn keyboard_input_system(
     mut player_input: ResMut<PlayerInput>,
     mut player_position: ResMut<PlayerPosition>,
     mut player_velocity_query: Query<&mut Velocity, With<ControllablePlayer>>,
-    mut animation_state_query: Query<(&mut SpriteAnimationStates, &mut SpriteFacing), With<ControllablePlayer>>,
+    mut animation_state_query: Query<(&mut PlayerSpriteAnimationStates, &mut SpriteFacing), With<ControllablePlayer>>,
     player_collision_query: Query<&PlayerColliding, With<ControllablePlayer>>,
     mut kinematiccontroller_query: Query<&mut KinematicCharacterController>,
 ) {

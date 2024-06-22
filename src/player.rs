@@ -47,7 +47,7 @@ pub struct PlayerSpriteAtlas {
 }
 
 #[derive(Component)]
-pub struct SpriteAnimationStates {
+pub struct PlayerSpriteAnimationStates {
     pub current_state: PlayerAnimationStates,
     pub available_states:  Vec<(PlayerAnimationStates, Vec<usize>)>,
     pub changed: bool,
@@ -57,15 +57,15 @@ pub struct SpriteAnimationStates {
 pub struct ControllablePlayer;
 
 pub struct AnimatedSprite {
-    texture: Handle<Image>,
-    atlas_layout: Handle<TextureAtlasLayout>,
-    animation_states: Vec<(PlayerAnimationStates, Vec<usize>)>,
+    pub texture: Handle<Image>,
+    pub atlas_layout: Handle<TextureAtlasLayout>,
+    pub animation_states: Vec<(PlayerAnimationStates, Vec<usize>)>,
 }
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGame), setup);
-        app.add_systems(Update, (animate_sprite, update_sprite_facing, move_sprite, player_sprite_follow_mouse).run_if(in_state(AppState::InGame)));
+        app.add_systems(Update, (animate_sprite, update_sprite_facing, player_sprite_follow_mouse).run_if(in_state(AppState::InGame)));
         app.add_systems(Update, (update_system).run_if(in_state(AppState::InGame)));
     }
 }
@@ -101,7 +101,7 @@ fn setup(
 
 
     animated_sprite.animation_states.push(
-        get_sprite_animation_states(
+        get_player_sprite_animation_states(
             PlayerAnimationStates::IDLE,
             requested_idle_sprite,
             &sprite_collection
@@ -109,7 +109,7 @@ fn setup(
     );
 
     animated_sprite.animation_states.push(
-        get_sprite_animation_states(
+        get_player_sprite_animation_states(
             PlayerAnimationStates::RUNNING,
             requested_running_sprite,
             &sprite_collection
@@ -117,7 +117,7 @@ fn setup(
     );
 
     animated_sprite.animation_states.push(
-        get_sprite_animation_states(
+        get_player_sprite_animation_states(
             PlayerAnimationStates::HIT,
             requested_hit_sprite,
             &sprite_collection
@@ -138,7 +138,7 @@ fn setup(
         last: default_sprite_index_last
     };
 
-    let sprite_animation_states = SpriteAnimationStates {
+    let sprite_animation_states = PlayerSpriteAnimationStates {
         current_state: PlayerAnimationStates::IDLE,
         available_states: animated_sprite.animation_states,
         changed: false,
@@ -185,38 +185,6 @@ fn setup(
             ActiveEvents::COLLISION_EVENTS,
         ));
     });
-
-    let bot_entity = commands.spawn((
-        SpriteSheetBundle {
-            sprite: Sprite {
-                flip_x: false,
-                ..Default::default()
-            },
-            texture: animated_sprite.texture,
-            atlas: TextureAtlas {
-                layout: animated_sprite.atlas_layout,
-                index: animation_indices.first,
-            },
-            transform: Transform {
-                translation: Vec3 { x: 200.0, y: 200.0, z: 1.0 },
-                rotation: Quat::default(),
-                scale: Vec3 { x: SCALE/1.2, y: SCALE/1.2, z: 1.0 },
-            },
-            ..Default::default()
-        },
-        SpriteFacing { facing: Facing::RIGHT },
-        animation_indices.clone(),
-        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-        Name::new("Bot"),
-    )).id();
-
-    commands.entity(bot_entity).with_children(|parent| {
-        parent.spawn((
-            TransformBundle::from(Transform { translation: Vec3::new(0.0, -4.0, 0.0), ..Default::default()}),
-            Collider::cuboid(10.0, 10.0),
-            ActiveEvents::COLLISION_EVENTS,
-        ));
-    });
 }
 
 fn register_collision_events(
@@ -242,7 +210,7 @@ fn update_system(mut controllers: Query<&mut KinematicCharacterController>) {
 }
 
 fn show_player_animation_state(
-    mut animation_state_query: Query<&SpriteAnimationStates, With<ControllablePlayer>>,
+    mut animation_state_query: Query<&PlayerSpriteAnimationStates, With<ControllablePlayer>>,
 ) {
     for state in &mut animation_state_query {
         println!("Current animation state: {:?}", state.current_state);
@@ -251,12 +219,12 @@ fn show_player_animation_state(
 
 fn animate_sprite(
     time: Res<Time>,
-    mut query: Query<(&mut AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
-    mut animation_state_query: Query<&mut SpriteAnimationStates, With<ControllablePlayer>>,
+    mut query: Query<(&mut AnimationIndices, &mut AnimationTimer, &mut TextureAtlas), With<ControllablePlayer>>,
+    mut animation_state_query: Query<&mut PlayerSpriteAnimationStates, With<ControllablePlayer>>,
 ) {
     let mut current_animation_state = animation_state_query.single_mut();
 
-    if (current_animation_state.changed) {
+    if current_animation_state.changed {
         let mut index_first: usize = 0;
         let mut index_last: usize = 0;
         for state in &current_animation_state.available_states {
@@ -287,22 +255,6 @@ fn animate_sprite(
     }
 }
 
-// fn animate_sprite(
-//     time: Res<Time>,
-//     mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
-// ) {
-//     for (indices, mut timer, mut sprite) in &mut query {
-//         timer.tick(time.delta());
-//         if timer.just_finished() {
-//             sprite.index = if sprite.index == indices.last {
-//                 indices.first
-//             } else {
-//                 sprite.index + 1
-//             };
-//         }
-//     }
-// }
-
 fn update_sprite_facing(
     mut sprite_query: Query<(&mut Sprite, &SpriteFacing), With<ControllablePlayer>>,
 ) {
@@ -313,17 +265,6 @@ fn update_sprite_facing(
     if facing.facing == Facing::RIGHT {
         sprite.flip_x = false;
     }
-}
-
-fn move_sprite(
-    time: Res<Time>,
-    mut sprite_query: Query<(&Velocity, &mut Transform, &mut PlayerPosition), With<ControllablePlayer>>,
-) {
-    // for (velocity, mut transform, mut player_position) in &mut sprite_query {
-    //     player_position.transform += Vec3::new(velocity.0.x, velocity.0.y, 0.0) * time.delta_seconds();
-    //     player_position.transform.z = 1.0;
-    //     transform.translation = player_position.transform;
-    // }
 }
 
 fn player_sprite_follow_mouse(
@@ -356,3 +297,30 @@ fn label_movement(
         label_transform.translation = transform + Vec3::new(0.0, 80.0, 0.0);
     }
 }
+
+// fn move_sprite(
+//     time: Res<Time>,
+//     mut sprite_query: Query<(&Velocity, &mut Transform, &mut PlayerPosition), With<ControllablePlayer>>,
+// ) {
+//     // for (velocity, mut transform, mut player_position) in &mut sprite_query {
+//     //     player_position.transform += Vec3::new(velocity.0.x, velocity.0.y, 0.0) * time.delta_seconds();
+//     //     player_position.transform.z = 1.0;
+//     //     transform.translation = player_position.transform;
+//     // }
+// }
+
+// fn animate_sprite(
+//     time: Res<Time>,
+//     mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
+// ) {
+//     for (indices, mut timer, mut sprite) in &mut query {
+//         timer.tick(time.delta());
+//         if timer.just_finished() {
+//             sprite.index = if sprite.index == indices.last {
+//                 indices.first
+//             } else {
+//                 sprite.index + 1
+//             };
+//         }
+//     }
+// }

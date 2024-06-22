@@ -361,7 +361,7 @@ pub fn spawn_icespike_attack(
         parent.spawn((
             TransformBundle::from(Transform { translation: Vec3::new(26.0, 0.0, 0.0), ..Default::default()}),
             RigidBody::Dynamic,
-            Collider::ball(5.0),
+            Collider::cuboid(5.0, 5.0),
         )).insert(Velocity {
             linvel: direction_vector_normalized,
             angvel: 0.4
@@ -414,7 +414,7 @@ pub fn spawn_fireball_attack(
         SpellColliding(false),
         (
             RigidBody::Dynamic,
-            Collider::ball(5.0),
+            Collider::cuboid(5.0, 5.0),
             // TransformBundle::from(Transform { translation: Vec3::new(26.0, 0.0, 0.0), ..Default::default()}),
         ),
         Velocity {
