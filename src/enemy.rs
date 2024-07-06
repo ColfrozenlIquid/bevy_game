@@ -1,16 +1,17 @@
 use std::f32::consts::PI;
+use rand::prelude::*;
 
-use bevy::{prelude::*, render::render_resource::AsBindGroup, sprite::{Material2d, COLOR_MATERIAL_SHADER_HANDLE}, transform};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{game::AnimationTimer, player::{AnimationIndices, ControllablePlayer, Facing, SpriteFacing}, spritesheet::{get_enemy_sprite_animation_states, get_sprite_atlas_layout, get_sprite_texture_handle, SpriteCollection, TextureAtlases, CHORT_IDLE, CHORT_RUN, DWARF_F_IDLE, DWARF_F_RUN, LIZARD_M_HIT, LIZARD_M_IDLE, LIZARD_M_RUN}, AppState, SCALE};
+use crate::{game::AnimationTimer, player::{AnimationIndices, ControllablePlayer, Facing, SpriteFacing}, spritesheet::{get_enemy_sprite_animation_states, get_sprite_atlas_layout, get_sprite_texture_handle, SpriteCollection, TextureAtlases, CHORT_IDLE, CHORT_RUN, LIZARD_M_HIT}, AppState, FONT_PATH, SCALE,};
 
 pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGame), setup);
-        app.add_systems(Update, (animate_sprite, enemy_movement).run_if(in_state(AppState::InGame)));
+        app.add_systems(Update, (animate_sprite, enemy_movement, test_damage_number, update_damage_numbers).run_if(in_state(AppState::InGame)));
     }
 }
 
@@ -28,13 +29,89 @@ pub enum EnemyAnimationStates {
 }
 
 #[derive(Component)]
-struct Enemy;
+pub struct Enemy;
 
 #[derive(Component)]
 pub struct EnemySpriteAnimationStates {
     pub current_state: EnemyAnimationStates,
     pub available_states:  Vec<(EnemyAnimationStates, Vec<usize>)>,
     pub changed: bool,
+}
+
+#[derive(Component)]
+struct DamageNumbers {
+    value: i32,
+    direction: Vec3,
+    timer: Timer,
+}
+
+impl DamageNumbers {
+    fn new(value: i32) -> Self {
+        let mut rng = rand::thread_rng();
+        let angle = rng.gen_range(0.0..std::f32::consts::TAU);
+        let direction = Vec3::new(angle.cos(), angle.sin(), 0.0);
+
+        return Self {
+            value,
+            direction,
+            timer: Timer::from_seconds(1.0, TimerMode::Once),
+        }
+    }
+}
+
+fn spawn_damage_number(
+    mut commands: Commands,
+    asset_server: ResMut<AssetServer>,
+    value: i32,
+    position: Vec3,
+) {
+    println!("Spawned damage number");
+    commands.spawn((
+        Text2dBundle {
+            text: Text::from_section(
+                value.to_string(),
+                TextStyle {
+                    font: asset_server.load(FONT_PATH),
+                    font_size: 30.0,
+                    color: Color::WHITE.into(),
+                },
+            ),
+            transform: Transform::from_translation(position),
+            ..Default::default()
+        }, 
+        DamageNumbers::new(value),
+    ));
+}
+
+fn update_damage_numbers(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut Transform, &mut Text, &mut DamageNumbers)>,
+){
+    for (entity, mut transform, mut text, mut damagenumber) in &mut query {
+        damagenumber.timer.tick(time.delta());
+
+        if damagenumber.timer.finished() {
+            commands.entity(entity).despawn();
+        } else {
+            transform.translation += damagenumber.direction * time.delta_seconds() * 65.0;
+            let alpha = 1.0 - damagenumber.timer.fraction();
+            text.sections[0].style.color.set_a(alpha);
+        }
+    }
+}
+
+fn test_damage_number(
+    commands: Commands,
+    asset_server: ResMut<AssetServer>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::KeyI) {
+        let value = 10;
+        let position = Vec3::new(1500.0, 1500.0, 7.0);
+    
+        spawn_damage_number(commands, asset_server, value, position)
+    }
 }
 
 fn setup(
@@ -135,6 +212,13 @@ fn setup(
         Name::new("Bot"),
         Enemy{},
         RigidBody::Dynamic,
+        LockedAxes::ROTATION_LOCKED,
+        CollisionGroups::new(Group::from_bits(0b01).unwrap(), Group::from_bits(0b01).unwrap()),
+        ColliderMassProperties::Density(2.0),
+        Damping {
+            linear_damping: 2.0,
+            ..Default::default()
+        },
     )).id();
 
     commands.entity(bot_entity).with_children(|parent| {
@@ -144,6 +228,8 @@ fn setup(
             ActiveEvents::COLLISION_EVENTS,
         ));
     });
+
+    
 }
 
 fn animate_sprite(
@@ -162,7 +248,7 @@ fn animate_sprite(
                 index_last = *state.1.last().unwrap();
             }
         }
-        for (mut indices, timer, mut sprite) in &mut query {
+        for (mut indices, _timer, mut sprite) in &mut query {
             indices.first = index_first;
             indices.last = index_last;
             sprite.index = index_first;

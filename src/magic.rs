@@ -383,7 +383,7 @@ pub fn spawn_fireball_attack(
     let sprite_spawn_position = position_player.truncate() + (direction_vector_normalized * 65.0);
     let angle = direction_vector_normalized.angle_between(Vec2 { x: 1.0, y: 0.0 });
 
-    let spell_entity = commands.spawn((
+    let mut spell_entity = commands.spawn((
         SpriteSheetBundle {
             texture: magic_sprite.image.clone(),
             atlas: TextureAtlas {
@@ -421,7 +421,9 @@ pub fn spawn_fireball_attack(
             linvel: direction_vector_normalized * 300.0,
             angvel: 0.0
         },
-    )).id();
+    ));
+
+    spell_entity.insert(CollisionGroups::new(Group::from_bits(0b01).unwrap(), Group::from_bits(0b01).unwrap()));
 
     // commands.entity(spell_entity).with_children(|parent| {
     //     parent.spawn((
@@ -477,14 +479,20 @@ fn enable_spell_cooldown(
 fn spell_collision_events(
     mut collision_events: EventReader<CollisionEvent>,
     mut commands: Commands,
-    query: Query<&Name>,
+    query: Query<&CastSpell>,
 ) {
     for event in collision_events.read() {
         println!("Collision event detected: {:?}", event);
         match event {
             CollisionEvent::Started(mut entity_1, mut entity_2, _) => {
-                commands.entity(entity_2).despawn_recursive();
-                // generate_spell_collision(&mut entity_1, &mut commands);
+                let entity_1_component = query.get(entity_1).is_ok();
+                let entity_2_component = query.get(entity_2).is_ok();
+                if entity_1_component {
+                    commands.entity(entity_1).despawn_recursive();
+                }
+                if entity_2_component {
+                    commands.entity(entity_2).despawn_recursive();
+                }
             },
             CollisionEvent::Stopped(entity_1, entity_2, _) => {},
         }

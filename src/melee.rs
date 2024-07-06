@@ -1,4 +1,5 @@
 use std::f32::consts::PI;
+use bevy_rapier2d::prelude::*;
 
 use bevy::{prelude::*, tasks::futures_lite::io::Repeat};
 
@@ -9,7 +10,7 @@ pub struct MeleePlugin;
 impl Plugin for MeleePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::InGame), setup);
-        app.add_systems(Update, (sword_follow_cursor, sword_swing, update_swing).run_if(in_state(AppState::InGame)));
+        app.add_systems(Update, (sword_follow_cursor, sword_swing, update_swing, sword_stab_animation).run_if(in_state(AppState::InGame)));
     }
 }
 
@@ -38,38 +39,6 @@ impl SwordSwing {
     }
 }
 
-// fn update_swing(
-//     time: Res<Time>,
-//     mut query: Query<(&mut SwordSwing, &mut Transform)>,
-// ) {
-//     for (mut swing, mut transform) in query.iter_mut() {
-//         if swing.swinging {
-//             swing.timer.tick(time.delta());
-//             let progress = swing.timer.fraction();
-            
-//             // Offset the rotation center (assuming center of the sprite is adjusted)
-//             let offset_translation = Vec3::new(0.0, 100.0, 0.0); // Example offset
-
-//             // Calculate the target rotation
-//             let target_rotation = Quat::from_rotation_z(swing.start_rotation + progress * (swing.end_rotation - swing.start_rotation));
-
-//             // Apply the offset translation to the transform
-//             transform.translation += offset_translation;
-
-//             // Apply the rotation around the offset center
-//             transform.rotation = Quat::from_rotation_z(swing.start_rotation) * target_rotation; // Initial rotation
-//                                 //  * target_rotation // Animated rotation
-
-//             // Reverse the offset translation
-//             transform.translation -= offset_translation;
-
-//             if swing.timer.finished() {
-//                 swing.swinging = false;
-//             }
-//         }
-//     }
-// }
-
 fn update_swing(
     time: Res<Time>,
     mut query: Query<(&mut SwordSwing, &mut Transform)>,
@@ -89,26 +58,9 @@ fn update_swing(
     }
 }
 
-// fn update_swing(
-//     time: Res<Time>,
-//     mut query: Query<(&mut SwordSwing, &mut Transform)>,
-// ) {
-//     for (mut swing, mut transform) in &mut query {
-//         if swing.swinging {
-//             swing.timer.tick(time.delta());
-//             let progress = 1.0 - swing.timer.fraction_remaining();
-//             transform.rotation = transform.rotation + Quat::from_rotation_z(swing.start_rotation + progress * (swing.end_rotation - swing.start_rotation));
-//         }
-//         if swing.timer.finished() {
-//             swing.swinging = false;
-//         }
-//     }
-// }
-
 fn sword_swing(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut SwordSwing, &mut Transform)>,
-
 ) {
     for (mut swing, mut transform) in &mut query {
         if keyboard_input.just_pressed(KeyCode::Space) && !swing.swinging {
@@ -160,39 +112,19 @@ fn setup(
         },
         Name::new("Sword"),
         Equipment,
+        Collider::cuboid(5.0, 8.0),
         SwordState::IDLE,
         SwordSwing::new(0.2, 0.0, PI/2.0),
+        Sensor,
     ));
 }
 
-fn sword_stab_animation() {
-    
+fn sword_stab_animation(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut query: Query<(&mut SwordSwing, &mut Transform)>,
+) {
+
 }
-
-// fn sword_attack_animation(
-//     commands: &mut Commands,
-//     sword_sprite: &Res<SwordSpriteAtlas>,
-//     position_cursor: &Vec2,
-//     position_player: &Vec3,
-// ) {
-//     let animation_indices = AnimationIndices { first: 0, last: 4};
-
-//     commands.spawn((
-//         SpriteSheetBundle {
-//             texture_atlas: sword_sprite.handle.clone(),
-//             sprite: TextureAtlasSprite::new(animation_indices.first),
-//             transform: Transform {
-//                 translation: Vec3::new(position_player.x, position_player.y, 1.0),
-//                 scale: Vec3::new(SCALE/2.0, SCALE/2.0, 1.0),
-//                 ..Default::default()
-//             },
-//             ..Default::default()
-//         },
-//         Sword{ curent_index: 0 },
-//         animation_indices.clone(),
-//         AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
-//     ));
-// }
 
 fn sword_follow_cursor(
     mut sword_transform: Query<(&mut Transform, &mut SwordSwing), With<Equipment>>,
@@ -224,30 +156,3 @@ fn sword_follow_cursor(
         }
     }
 }
-
-// fn despawn_sword_animation(
-//     mut commands: Commands,
-//     entity_query: Query<(Entity, &TextureAtlasSprite), With<Sword>>
-// ) {
-//     for (entity, sprite) in entity_query.iter() {
-//         if sprite.index == 4 {
-//             commands.entity(entity).despawn();
-//         }
-//     }
-// }
-
-// fn animate_sprite(
-//     time: Res<Time>,
-//     mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlasSprite)>,
-// ) {
-//     for (indices, mut timer, mut sprite) in &mut query {
-//         timer.tick(time.delta());
-//         if timer.just_finished() {
-//             sprite.index = if sprite.index == indices.last {
-//                 indices.first
-//             } else {
-//                 sprite.index + 1
-//             };
-//         }
-//     }
-// }

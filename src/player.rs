@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
-use crate::{game::{AnimationTimer, Equipment}, spritesheet::*, AppState, CursorWorldCoordinates, PlayerPosition, SCALE};
+use bevy_rapier2d::{prelude::*, rapier::dynamics::{RigidBodyForces, RigidBodyVelocity}};
+use crate::{enemy::Enemy, game::{AnimationTimer, Equipment}, spritesheet::*, AppState, CursorWorldCoordinates, PlayerPosition, SCALE};
 
 pub struct PlayerPlugin;
 
@@ -297,6 +297,48 @@ fn label_movement(
         label_transform.translation = transform + Vec3::new(0.0, 80.0, 0.0);
     }
 }
+
+// fn enemy_collision_events(
+//     mut collision_events: EventReader<CollisionEvent>,
+//     mut ext_impulses: Query<&mut RigidBodyForces>,
+// ) {
+//     for event in collision_events.read() {
+//         // println!("Collision event detected: {:?}", event);
+//         match event {
+//             CollisionEvent::Started(mut entity_1, mut entity_2, _) => {
+//                 for mut ext_impulse in &mut ext_impulses {
+//                     ext_impulse.impulse = Vec2::new(100.0, 200.0);
+//                     println!("Applying impulse");
+//                 }
+//             },
+//             CollisionEvent::Stopped(entity_1, entity_2, _) => {},
+//         }
+//     }
+// }
+
+// fn knockback_system(
+//     mut collision_event: EventReader<CollisionEvent>,
+//     mut query: Query<&mut ExternalImpulse>,
+//     transform: Query<&Transform>,
+// ) {
+//     for collision_event in collision_event.read() {
+//         if let CollisionEvent::Started(collider1, collider2, _) = collision_event {
+//             if let (Ok(mut impulse1), Ok(mut impulse2), Ok(transform1), Ok(transform2)) = (
+//                 query.get_mut(collider1.),
+//                 query.get_mut(collider2.entity()),
+//                 transform.get(collider1.entity()),
+//                 transform.get(collider2.entity()),
+//             ) {
+//                 let direction1 = (transform1.translation() - transform2.translation()).normalize();
+//                 let direction2 = -direction1;
+
+//                 let knockback_strength = 10.0;
+//                 impulse1.impulse += direction1 * knockback_strength;
+//                 impulse2.impulse += direction2 * knockback_strength;
+//             }
+//         }
+//     }
+// } 
 
 // fn move_sprite(
 //     time: Res<Time>,
