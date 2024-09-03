@@ -6,6 +6,7 @@ use bevy_game_client::enemy::EnemyPlugin;
 use bevy_game_client::game::GamePlugin;
 use bevy_game_client::healthbar::HealthBarPlugin;
 use bevy_game_client::input::InputPlugin;
+use bevy_game_client::inventory::InventoryPlugin;
 use bevy_game_client::level::LevelPlugin;
 use bevy_game_client::magic::MagicPlugin;
 use bevy_game_client::mainmenu::menu::MenuPlugin;
@@ -28,6 +29,7 @@ fn main() {
 
     app.add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(DebugPlugin)
+        .add_plugins(EnemyPlugin)
         .add_plugins(MagicPlugin)
         .add_plugins(MenuPlugin)
         .add_plugins(SplashPlugin)
@@ -37,14 +39,15 @@ fn main() {
         .add_plugins(GamePlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(HealthBarPlugin)
-        // .add_plugins(EnemyPlugin)
+        .add_plugins(InventoryPlugin)
         .add_plugins(RapierDebugRenderPlugin::default())
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+        
         // .add_plugins(NetworkPlugin)
         .add_plugins(LevelPlugin)
         // .add_plugins(MeleePlugin)
         .add_plugins(SpriteSheetPlugin)
         .add_plugins(ChestPlugin)
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .init_state::<AppState>();
 
         let mut rapier_config = RapierConfiguration::new(100.0);

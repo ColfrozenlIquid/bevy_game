@@ -5,10 +5,10 @@ use bevy_rapier2d::prelude::*;
 use std::f32::consts::PI;
 use std::time::Duration;
 
-const FIRE_BALL_SPRITE_PATH: &str = ".\\sprites\\magic\\FireBall_64x64.png";
-const ICE_SPIKE_SPRITE_PATH: &str = ".\\sprites\\magic\\IcePick_64x64.png";
-const FIRE_BURST_SPRITE_PATH: &str = ".\\sprites\\magic\\FireBurst_64x64.png";
-const ICE_SPIKE_SHATTER_SPRITE_PATH: &str = ".\\sprites\\magic\\IceShatter_96x96.png";
+const FIRE_BALL_SPRITE_PATH: &str = "./sprites/magic/FireBall_64x64.png";
+const ICE_SPIKE_SPRITE_PATH: &str = "./sprites/magic/IcePick_64x64.png";
+const FIRE_BURST_SPRITE_PATH: &str = "./sprites/magic/FireBurst_64x64.png";
+const ICE_SPIKE_SHATTER_SPRITE_PATH: &str = "./sprites/magic/IceShatter_96x96.png";
 
 const SCALE: f32 = 5.0;
 
@@ -22,9 +22,6 @@ struct AnimationIndices {
 
 #[derive(Component, Deref, DerefMut)]
 struct AnimationTimer(Timer);
-
-#[derive(Component)]
-struct SpellColliding(bool);
 
 #[derive(Component)]
 struct CastSpell {
@@ -91,20 +88,29 @@ pub struct IceSpikeSpriteAtlas {
     layout: Handle<TextureAtlasLayout>,
 }
 
+#[derive(Debug, Clone, Event)]
+pub struct EnemySpellCollisionEvent{
+    spell_entity: Entity,
+    enemy_entity: Entity,
+}
+
 impl Plugin for MagicPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
         app.add_systems(Update, (
             despawn_spells,
             // spell_flight_system,
+            receive_enemy_spell_collision_event,
             select_spell_system,
             enable_spell_cooldown,
             cursor_system,
             despawn_fireball_spell_collision,
             despawn_icespike_spell_collision,
             animate_sprite,
-            spell_collision_events
+            enemy_spell_collision_event
         ));
+
+        app.add_event::<EnemySpellCollisionEvent>();
 
         app.insert_resource(FireBallSpriteAtlas::default());
         app.insert_resource(FireBurstSpriteAtlas::default());
@@ -354,7 +360,6 @@ pub fn spawn_icespike_attack(
         AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
         ActiveEvents::COLLISION_EVENTS,
         Name::new("Ice Spike"),
-        SpellColliding(false),
     )).id();
 
     commands.entity(spell_entity).with_children(|parent| {
@@ -411,7 +416,6 @@ pub fn spawn_fireball_attack(
         ActiveEvents::COLLISION_EVENTS,
         LockedAxes::ROTATION_LOCKED,
         Name::new("FireBall"),
-        SpellColliding(false),
         (
             RigidBody::Dynamic,
             Collider::cuboid(5.0, 5.0),
@@ -424,50 +428,18 @@ pub fn spawn_fireball_attack(
     ));
 
     spell_entity.insert(CollisionGroups::new(Group::from_bits(0b01).unwrap(), Group::from_bits(0b01).unwrap()));
-
-    // commands.entity(spell_entity).with_children(|parent| {
-    //     parent.spawn((
-    //         TransformBundle::from(Transform { translation: Vec3::new(26.0, 0.0, 0.0), ..Default::default()}),
-    //         RigidBody::Dynamic,
-    //         Collider::ball(5.0),
-    //     )).insert(Velocity {
-    //         linvel: direction_vector_normalized * 300.0,
-    //         angvel: 0.0
-    //     });
-    // });
 }
 
-// fn spell_collision_events(
-//     mut collision_events: EventReader<CollisionEvent>,
-//     query: Query<&Name>,
+// fn spell_flight_system(
+//     time: Res<Time>,
+//     mut cast_spell_query: Query<(&mut Transform, &CastSpell)>
 // ) {
-//     for event in collision_events.read() {
-//         println!("Collision event detected: {:?}", event);
-//         match event {
-//             CollisionEvent::Started(entity_1, entity_2, _) => {
-//                 let name1 = query.get(*entity_1);
-//                 let name2 = query.get(*entity_2);
-//                 println!("Collision started between {:?} and {:?}", name1, name2);
-//             },
-//             CollisionEvent::Stopped(entity_1, entity_2, _) => {
-//                 let name1 = query.get(*entity_1);
-//                 let name2 = query.get(*entity_2);
-//                 println!("Collision stopped between {:?} and {:?}", name1, name2);
-//             },
-//         }
+//     for (mut transform, cast_spell) in cast_spell_query.iter_mut() {
+//         let delta_seconds = time.delta_seconds();
+//         transform.translation.x += cast_spell.direction.x * delta_seconds * cast_spell.velocity;
+//         transform.translation.y += cast_spell.direction.y * delta_seconds * cast_spell.velocity;
 //     }
 // }
-
-fn spell_flight_system(
-    time: Res<Time>,
-    mut cast_spell_query: Query<(&mut Transform, &CastSpell)>
-) {
-    for (mut transform, cast_spell) in cast_spell_query.iter_mut() {
-        let delta_seconds = time.delta_seconds();
-        transform.translation.x += cast_spell.direction.x * delta_seconds * cast_spell.velocity;
-        transform.translation.y += cast_spell.direction.y * delta_seconds * cast_spell.velocity;
-    }
-}
 
 fn enable_spell_cooldown(
     mut spell_cooldown: ResMut<SpellCoolDown>,
@@ -476,30 +448,43 @@ fn enable_spell_cooldown(
     spell_cooldown.timer.tick(time.delta());
 }
 
-fn spell_collision_events(
+fn enemy_spell_collision_event(
     mut collision_events: EventReader<CollisionEvent>,
-    mut commands: Commands,
-    query: Query<&CastSpell>,
+    query_name: Query<&Name, With<Collider>>,
+    mut events: EventWriter<EnemySpellCollisionEvent>
 ) {
     for event in collision_events.read() {
         println!("Collision event detected: {:?}", event);
         match event {
-            CollisionEvent::Started(mut entity_1, mut entity_2, _) => {
-                let entity_1_component = query.get(entity_1).is_ok();
-                let entity_2_component = query.get(entity_2).is_ok();
-                if entity_1_component {
-                    commands.entity(entity_1).despawn_recursive();
+            CollisionEvent::Started(entity_1, entity_2, _) => {
+                let unknown = &Name::new("Unknown");
+                let entity_1_name = query_name.get(*entity_1).unwrap_or(unknown);
+                let entity_2_name = query_name.get(*entity_2).unwrap_or(unknown);
+                println!("Entity 1 name: {:?}, Entity 2 name: {:?}", entity_1_name, entity_2_name);
+                if entity_1_name == &Name::new("FireBall") && entity_2_name == &Name::new("Enemy") {
+                    events.send(EnemySpellCollisionEvent { 
+                        spell_entity: *entity_1, 
+                        enemy_entity: *entity_2
+                    });
                 }
-                if entity_2_component {
-                    commands.entity(entity_2).despawn_recursive();
+                else if entity_1_name == &Name::new("Enemy") && entity_2_name == &Name::new("FireBall") {
+                    events.send(EnemySpellCollisionEvent { 
+                        spell_entity: *entity_2, 
+                        enemy_entity: *entity_1
+                    });
                 }
             },
-            CollisionEvent::Stopped(entity_1, entity_2, _) => {},
+            _ => {},
         }
     }
 }
 
-fn generate_spell_collision(entity: &mut Entity, commands: &mut Commands) {
-    println!("Spell Collision should be handled here on spell: {:?}", entity);
-    let spell = commands.entity(*entity).id();
+fn receive_enemy_spell_collision_event(
+    mut events: EventReader<EnemySpellCollisionEvent>,
+    mut commands: Commands,
+) {
+    for event in events.read().enumerate() {
+        commands.entity(event.1.enemy_entity).despawn_recursive();
+        commands.entity(event.1.spell_entity).despawn_recursive();
+    }
 }

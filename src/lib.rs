@@ -14,8 +14,10 @@ pub mod player;
 pub mod healthbar;
 pub mod enemy;
 pub mod chest;
+pub mod inventory;
 
 use std::time::Duration;
+
 use bevy::{
     ecs::{component::Component, entity::Entity, event::Event, schedule::States, system::Resource},
     math::Vec3, render::color::Color

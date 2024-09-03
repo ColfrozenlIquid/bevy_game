@@ -209,7 +209,6 @@ fn setup(
         sprite_animation_states,
         animation_indices.clone(),
         AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-        Name::new("Bot"),
         Enemy{},
         RigidBody::Dynamic,
         LockedAxes::ROTATION_LOCKED,
@@ -219,16 +218,11 @@ fn setup(
             linear_damping: 2.0,
             ..Default::default()
         },
+        // TransformBundle::from(Transform { translation: Vec3::new(0.0, -4.0, 0.0), ..Default::default()}),
+        Collider::cuboid(10.0, 10.0),
+        ActiveEvents::COLLISION_EVENTS,
+        Name::new("Enemy"),
     )).id();
-
-    commands.entity(bot_entity).with_children(|parent| {
-        parent.spawn((
-            TransformBundle::from(Transform { translation: Vec3::new(0.0, -4.0, 0.0), ..Default::default()}),
-            Collider::cuboid(10.0, 10.0),
-            ActiveEvents::COLLISION_EVENTS,
-        ));
-    });
-
     
 }
 
@@ -237,33 +231,33 @@ fn animate_sprite(
     mut query: Query<(&mut AnimationIndices, &mut AnimationTimer, &mut TextureAtlas), With<Enemy>>,
     mut animation_state_query: Query<&mut EnemySpriteAnimationStates, With<Enemy>>,
 ) {
-    let mut current_animation_state = animation_state_query.single_mut();
-
-    if current_animation_state.changed {
-        let mut index_first: usize = 0;
-        let mut index_last: usize = 0;
-        for state in &current_animation_state.available_states {
-            if state.0 == current_animation_state.current_state {
-                index_first = *state.1.first().unwrap();
-                index_last = *state.1.last().unwrap();
+    if let Ok(mut current_animation_state) = animation_state_query.get_single_mut() {
+        if current_animation_state.changed {
+            let mut index_first: usize = 0;
+            let mut index_last: usize = 0;
+            for state in &current_animation_state.available_states {
+                if state.0 == current_animation_state.current_state {
+                    index_first = *state.1.first().unwrap();
+                    index_last = *state.1.last().unwrap();
+                }
             }
+            for (mut indices, _timer, mut sprite) in &mut query {
+                indices.first = index_first;
+                indices.last = index_last;
+                sprite.index = index_first;
+            }
+            current_animation_state.changed = false;
         }
-        for (mut indices, _timer, mut sprite) in &mut query {
-            indices.first = index_first;
-            indices.last = index_last;
-            sprite.index = index_first;
-        }
-        current_animation_state.changed = false;
-    }
-
-    for (indices, mut timer, mut sprite) in &mut query {
-        timer.tick(time.delta());
-        if timer.just_finished() {
-            sprite.index = if sprite.index == indices.last {
-                indices.first
-            } else {
-                sprite.index + 1
-            };
+    
+        for (indices, mut timer, mut sprite) in &mut query {
+            timer.tick(time.delta());
+            if timer.just_finished() {
+                sprite.index = if sprite.index == indices.last {
+                    indices.first
+                } else {
+                    sprite.index + 1
+                };
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ use crate::{enemy::Enemy, game::{AnimationTimer, Equipment}, spritesheet::*, App
 
 pub struct PlayerPlugin;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum PlayerAnimationStates {
     IDLE,
     RUNNING,
@@ -48,6 +48,7 @@ pub struct PlayerSpriteAtlas {
 
 #[derive(Component)]
 pub struct PlayerSpriteAnimationStates {
+    pub last_state: PlayerAnimationStates,
     pub current_state: PlayerAnimationStates,
     pub available_states:  Vec<(PlayerAnimationStates, Vec<usize>)>,
     pub changed: bool,
@@ -139,6 +140,7 @@ fn setup(
     };
 
     let sprite_animation_states = PlayerSpriteAnimationStates {
+        last_state: PlayerAnimationStates::IDLE,
         current_state: PlayerAnimationStates::IDLE,
         available_states: animated_sprite.animation_states,
         changed: false,
@@ -222,25 +224,23 @@ fn animate_sprite(
     mut query: Query<(&mut AnimationIndices, &mut AnimationTimer, &mut TextureAtlas), With<ControllablePlayer>>,
     mut animation_state_query: Query<&mut PlayerSpriteAnimationStates, With<ControllablePlayer>>,
 ) {
-    let mut current_animation_state = animation_state_query.single_mut();
-
-    if current_animation_state.changed {
+    let mut animation_state = animation_state_query.single_mut();
+    
+    if animation_state.current_state != animation_state.last_state {
         let mut index_first: usize = 0;
         let mut index_last: usize = 0;
-        for state in &current_animation_state.available_states {
-            if state.0 == current_animation_state.current_state {
+        for state in &animation_state.available_states {
+            if state.0 == animation_state.current_state {
                 index_first = *state.1.first().unwrap();
                 index_last = *state.1.last().unwrap();
-                // println!("Assigning sprite indices to {} and {}", index_first, index_last);
             }
         }
         for (mut indices, timer, mut sprite) in &mut query {
             indices.first = index_first;
             indices.last = index_last;
             sprite.index = index_first;
-            // println!("Sprite indices are: {} and {}", indices.first, indices.last);
         }
-        current_animation_state.changed = false;
+        animation_state.last_state = animation_state.current_state;
     }
 
     for (indices, mut timer, mut sprite) in &mut query {
@@ -297,72 +297,3 @@ fn label_movement(
         label_transform.translation = transform + Vec3::new(0.0, 80.0, 0.0);
     }
 }
-
-// fn enemy_collision_events(
-//     mut collision_events: EventReader<CollisionEvent>,
-//     mut ext_impulses: Query<&mut RigidBodyForces>,
-// ) {
-//     for event in collision_events.read() {
-//         // println!("Collision event detected: {:?}", event);
-//         match event {
-//             CollisionEvent::Started(mut entity_1, mut entity_2, _) => {
-//                 for mut ext_impulse in &mut ext_impulses {
-//                     ext_impulse.impulse = Vec2::new(100.0, 200.0);
-//                     println!("Applying impulse");
-//                 }
-//             },
-//             CollisionEvent::Stopped(entity_1, entity_2, _) => {},
-//         }
-//     }
-// }
-
-// fn knockback_system(
-//     mut collision_event: EventReader<CollisionEvent>,
-//     mut query: Query<&mut ExternalImpulse>,
-//     transform: Query<&Transform>,
-// ) {
-//     for collision_event in collision_event.read() {
-//         if let CollisionEvent::Started(collider1, collider2, _) = collision_event {
-//             if let (Ok(mut impulse1), Ok(mut impulse2), Ok(transform1), Ok(transform2)) = (
-//                 query.get_mut(collider1.),
-//                 query.get_mut(collider2.entity()),
-//                 transform.get(collider1.entity()),
-//                 transform.get(collider2.entity()),
-//             ) {
-//                 let direction1 = (transform1.translation() - transform2.translation()).normalize();
-//                 let direction2 = -direction1;
-
-//                 let knockback_strength = 10.0;
-//                 impulse1.impulse += direction1 * knockback_strength;
-//                 impulse2.impulse += direction2 * knockback_strength;
-//             }
-//         }
-//     }
-// } 
-
-// fn move_sprite(
-//     time: Res<Time>,
-//     mut sprite_query: Query<(&Velocity, &mut Transform, &mut PlayerPosition), With<ControllablePlayer>>,
-// ) {
-//     // for (velocity, mut transform, mut player_position) in &mut sprite_query {
-//     //     player_position.transform += Vec3::new(velocity.0.x, velocity.0.y, 0.0) * time.delta_seconds();
-//     //     player_position.transform.z = 1.0;
-//     //     transform.translation = player_position.transform;
-//     // }
-// }
-
-// fn animate_sprite(
-//     time: Res<Time>,
-//     mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
-// ) {
-//     for (indices, mut timer, mut sprite) in &mut query {
-//         timer.tick(time.delta());
-//         if timer.just_finished() {
-//             sprite.index = if sprite.index == indices.last {
-//                 indices.first
-//             } else {
-//                 sprite.index + 1
-//             };
-//         }
-//     }
-// }
